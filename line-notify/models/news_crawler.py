@@ -4,7 +4,7 @@ from newspaper import Article
 from datetime import datetime,timedelta
 import requests, json
 from bs4 import BeautifulSoup
-import config
+#import config
 
 
 class news_crawler(models.Model):
@@ -53,7 +53,7 @@ class news_crawler(models.Model):
                             })
                             if create_record:
                                 #發送 Line Notify 訊息
-                                token = config.line_token()  # MySelf
+                                token = 'phM16T6P9ZJ70Cd6POetxTjYAm7VwYlhbqlEoZvsplY'  # MySelf
                                 self.lineNotify(token, news[i]['title'] + " " + news[i]['url'])
     def get_udn_news(self,keyword):
         udn_url = 'https://udn.com/api/more?page=0&id=search:%E5%9F%BA%E9%80%B2&channelId=2&type=searchword'
@@ -95,7 +95,7 @@ class news_crawler(models.Model):
                         })
                         if create_record:
                             #發送 Line Notify 訊息
-                            token = config.line_token()  # MySelf
+                            token = 'phM16T6P9ZJ70Cd6POetxTjYAm7VwYlhbqlEoZvsplY'  # MySelf
                             self.lineNotify(token, title + " " + url)
     def get_apple_news(self,keyword):
         apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22%25E5%259F%25BA%25E9%2580%25B2%22%2C%22start%22%3A-1%7D&d=262'
@@ -132,7 +132,7 @@ class news_crawler(models.Model):
                     })
                     if create_record:
                         #發送 Line Notify 訊息
-                        token = config.line_token()  # MySelf
+                        token = 'phM16T6P9ZJ70Cd6POetxTjYAm7VwYlhbqlEoZvsplY'  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_ltn_news(self,keyword):
         url = 'https://search.ltn.com.tw/list?keyword=%E5%9F%BA%E9%80%B2'
@@ -175,7 +175,7 @@ class news_crawler(models.Model):
                             })
                         if create_record:
                             #發送 Line Notify 訊息
-                            token = config.line_token()  # MySelf
+                            token = 'phM16T6P9ZJ70Cd6POetxTjYAm7VwYlhbqlEoZvsplY'  # MySelf
                             self.lineNotify(token, title + " " + url)
     def get_setn_news(self,keyword):
         url = 'https://www.setn.com/search.aspx?q=%E5%9F%BA%E9%80%B2&r=0'
@@ -216,7 +216,7 @@ class news_crawler(models.Model):
                                 })
                         if create_record:
                             #發送 Line Notify 訊息
-                            token = config.line_token()  # MySelf
+                            token = 'phM16T6P9ZJ70Cd6POetxTjYAm7VwYlhbqlEoZvsplY'  # MySelf
                             self.lineNotify(token, title + " " + url)
     def get_ettoday_news(self,keyword):
         url = 'https://www.ettoday.net/news_search/doSearch.php?search_term_string=%E5%9F%BA%E9%80%B2'
@@ -258,7 +258,7 @@ class news_crawler(models.Model):
                                 })
                         if create_record:
                             #發送 Line Notify 訊息
-                            token = config.line_token()  # MySelf
+                            token = 'phM16T6P9ZJ70Cd6POetxTjYAm7VwYlhbqlEoZvsplY'  # MySelf
                             self.lineNotify(token, title + " " + url)
     def get_TVBS_news(self,keyword):
         url = 'https://news.tvbs.com.tw/news/searchresult/%E5%9F%BA%E9%80%B2/news'
@@ -300,7 +300,7 @@ class news_crawler(models.Model):
                                 })
                         if create_record:
                             #發送 Line Notify 訊息
-                            token = config.line_token()  # MySelf
+                            token = 'phM16T6P9ZJ70Cd6POetxTjYAm7VwYlhbqlEoZvsplY'  # MySelf
                             self.lineNotify(token, title + " " + url)
     def get_china_news(self,keyword):
         links = ['https://www.chinatimes.com/search/%E9%99%B3%E6%9F%8F%E6%83%9F?chdtv','https://www.chinatimes.com/search/%E5%9F%BA%E9%80%B2?chdtv']
@@ -339,5 +339,5 @@ class news_crawler(models.Model):
                                     })
                             if create_record:
                                 #發送 Line Notify 訊息
-                                token = config.line_token()  # MySelf
+                                token = 'phM16T6P9ZJ70Cd6POetxTjYAm7VwYlhbqlEoZvsplY'  # MySelf
                                 self.lineNotify(token, title + " " + url)
