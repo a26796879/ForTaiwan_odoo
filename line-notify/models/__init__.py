@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
 
-from . import models
 from . import news_crawler
+from . import config_token

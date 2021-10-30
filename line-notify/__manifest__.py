@@ -25,9 +25,11 @@
     # always loaded
     'data': [
         'security/ir.model.access.csv',
-        'views/views.xml',
-        'views/templates.xml',
-        'views/news_crawler.xml'
+        'views/news_crawler.xml',
+        'views/config_token.xml',
+        'views/menu.xml',
+        'views/templates.xml'
+
     ],
     # only loaded in demonstration mode
     'demo': [

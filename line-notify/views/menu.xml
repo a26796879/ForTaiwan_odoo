@@ -1,0 +1,18 @@
+<odoo>
+    <record id="news_crawler_action" model="ir.actions.act_window">
+      <field name="name">news_crawler</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">news_crawler</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="config_token_action" model="ir.actions.act_window">
+      <field name="name">config_token</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">config_token</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem id="menu_news_crawler_view" name="news_crawler" action="news_crawler_action"/>
+    <menuitem id="menu_config_token_view" name="config_token" action="config_token_action"/>
+</odoo>
