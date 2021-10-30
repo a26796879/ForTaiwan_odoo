@@ -428,7 +428,7 @@ class news_crawler(models.Model):
                         #發送 Line Notify 訊息
                             token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                             self.lineNotify(token, title + " " + url)
-    def get_ftv_news(keyword):
+    def get_ftv_news(self,keyword):
         url = 'https://www.ftvnews.com.tw/search/' + keyword
         headers = {
             'method': 'GET',
@@ -467,7 +467,7 @@ class news_crawler(models.Model):
                         #發送 Line Notify 訊息
                             token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                             self.lineNotify(token, title + " " + url)
-    def get_cna_news(keyword):
+    def get_cna_news(self,keyword):
         url = 'https://www.cna.com.tw/search/hysearchws.aspx?q=' + keyword
         headers = {
             'method': 'GET',
