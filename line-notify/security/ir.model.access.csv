@@ -1,2 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_news_crawler,news_crawler,model_news_crawler,base.group_user,1,1,1,1
+
+access_news_crawler,news_crawler,model_news_crawler,group_User,1,0,0,0
+access_news_crawler,news_crawler,model_news_crawler,group_User,1,0,0,0
+
+access_config_token,config_token,model_config_token,group_Admin,1,1,1,1
+access_config_token,config_token,model_config_token,group_Admin,1,1,1,1
