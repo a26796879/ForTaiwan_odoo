@@ -6,7 +6,7 @@
         <field name="model">config_token</field>
         <field name="arch" type="xml">
             <tree>
-            <field name="env"/>
+            <field name="env_name"/>
             <field name="line_token"/>
             </tree>
         </field>
@@ -18,7 +18,7 @@
         <field name="arch" type="xml">
             <form>
                 <group>
-                    <field name="env"/>
+                    <field name="env_name"/>
                     <field name="line_token"/>
                 </group>
             </form>

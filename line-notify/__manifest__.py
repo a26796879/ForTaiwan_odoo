@@ -24,9 +24,11 @@
 
     # always loaded
     'data': [
+        'security/security_group.xml',
         'security/ir.model.access.csv',
         'views/news_crawler.xml',
         'views/config_token.xml',
+        'views/cron.xml',
         'views/menu.xml',
         'views/templates.xml'
 
