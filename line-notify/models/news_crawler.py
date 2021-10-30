@@ -4,8 +4,6 @@ from newspaper import Article
 from datetime import datetime,timedelta
 import requests, json
 from bs4 import BeautifulSoup
-#import config
-
 
 class news_crawler(models.Model):
     _name = 'news_crawler'
@@ -25,7 +23,7 @@ class news_crawler(models.Model):
         r = requests.post(url, headers = headers, params = payload)#, files = files)
         return r.status_code
 
-    def get_news(self,keyword):
+    def get_google_news(self,keyword):
         google_news = GNews(language='zh-Hant', country='TW', period='4h')
         news = google_news.get_news(keyword)
         news_count = len(news)
@@ -34,11 +32,12 @@ class news_crawler(models.Model):
             article = Article(news[i]['url'])
             article.download()
             article.parse()
-
-            if keyword in article.text:
-                print(news[i]['url'])
+            title = news[i]['title']
+            url = news[i]['url']
+            publisher = news[i]['publisher']['title']
+            if keyword in article.text and 'from' not in url:
                 if 'yahoo' not in news[i]['url']:
-                    if len(self.env['news_crawler'].search([("url","=",news[i]['url'])])) == 0  and len(self.env['news_crawler'].search([("name","=",news[i]['title'])])) == 0:
+                    if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
                         dateString = news[i]['published date']
                         dateFormatter = "%a, %d %b %Y %H:%M:%S GMT"
                         published_date = datetime.strptime(dateString, dateFormatter)
@@ -46,15 +45,16 @@ class news_crawler(models.Model):
                         if published_date >= expect_time:
                             create_record = self.create({
                                 'id':1,
-                                'name': news[i]['title'],
-                                'publisher': news[i]['publisher']['title'],
-                                'url': news[i]['url'],
+                                'name': title,
+                                'publisher':publisher ,
+                                'url': url,
                                 'date': published_date
                             })
+                            self.env.cr.commit()
                             if create_record:
                                 #發送 Line Notify 訊息
-                                token = 'phM16T6P9ZJ70Cd6POetxTjYAm7VwYlhbqlEoZvsplY'  # MySelf
-                                self.lineNotify(token, news[i]['title'] + " " + news[i]['url'])
+                                token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                                self.lineNotify(token, title + " " + url)
     def get_udn_news(self,keyword):
         udn_url = 'https://udn.com/api/more?page=0&id=search:%E5%9F%BA%E9%80%B2&channelId=2&type=searchword'
         # 中時Ｘ TVBSＸ 自由時報Ｘ 三立Ｘ
@@ -79,7 +79,7 @@ class news_crawler(models.Model):
             article.download()
             article.parse()
             
-            if keyword in article.text:
+            if keyword in article.text and 'from' not in url:
                 if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
                     dateString = news[i]['time']['date']
                     dateFormatter = "%Y-%m-%d %H:%M:%S"
@@ -93,9 +93,10 @@ class news_crawler(models.Model):
                             'url': url,
                             'date': published_date
                         })
+                        self.env.cr.commit()
                         if create_record:
                             #發送 Line Notify 訊息
-                            token = 'phM16T6P9ZJ70Cd6POetxTjYAm7VwYlhbqlEoZvsplY'  # MySelf
+                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                             self.lineNotify(token, title + " " + url)
     def get_apple_news(self,keyword):
         apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22%25E5%259F%25BA%25E9%2580%25B2%22%2C%22start%22%3A-1%7D&d=262'
@@ -130,9 +131,10 @@ class news_crawler(models.Model):
                         'url': url,
                         'date': published_date
                     })
+                    self.env.cr.commit()
                     if create_record:
                         #發送 Line Notify 訊息
-                        token = 'phM16T6P9ZJ70Cd6POetxTjYAm7VwYlhbqlEoZvsplY'  # MySelf
+                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_ltn_news(self,keyword):
         url = 'https://search.ltn.com.tw/list?keyword=%E5%9F%BA%E9%80%B2'
@@ -172,10 +174,11 @@ class news_crawler(models.Model):
                                 'publisher': '自由時報電子報',
                                 'url':url,
                                 'date': published_date
-                            })
+                        })
+                        self.env.cr.commit()
                         if create_record:
                             #發送 Line Notify 訊息
-                            token = 'phM16T6P9ZJ70Cd6POetxTjYAm7VwYlhbqlEoZvsplY'  # MySelf
+                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                             self.lineNotify(token, title + " " + url)
     def get_setn_news(self,keyword):
         url = 'https://www.setn.com/search.aspx?q=%E5%9F%BA%E9%80%B2&r=0'
@@ -213,10 +216,11 @@ class news_crawler(models.Model):
                                     'publisher': '三立新聞網',
                                     'url':url,
                                     'date': published_date
-                                })
+                        })
+                        self.env.cr.commit()
                         if create_record:
                             #發送 Line Notify 訊息
-                            token = 'phM16T6P9ZJ70Cd6POetxTjYAm7VwYlhbqlEoZvsplY'  # MySelf
+                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                             self.lineNotify(token, title + " " + url)
     def get_ettoday_news(self,keyword):
         url = 'https://www.ettoday.net/news_search/doSearch.php?search_term_string=%E5%9F%BA%E9%80%B2'
@@ -255,10 +259,11 @@ class news_crawler(models.Model):
                                     'publisher': 'ETtoday新聞雲',
                                     'url':url,
                                     'date': published_date
-                                })
+                        })
+                        self.env.cr.commit()
                         if create_record:
                             #發送 Line Notify 訊息
-                            token = 'phM16T6P9ZJ70Cd6POetxTjYAm7VwYlhbqlEoZvsplY'  # MySelf
+                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                             self.lineNotify(token, title + " " + url)
     def get_TVBS_news(self,keyword):
         url = 'https://news.tvbs.com.tw/news/searchresult/%E5%9F%BA%E9%80%B2/news'
@@ -297,10 +302,11 @@ class news_crawler(models.Model):
                                     'publisher': 'TVBS新聞網',
                                     'url':url,
                                     'date': published_date
-                                })
+                        })
+                        self.env.cr.commit()
                         if create_record:
                             #發送 Line Notify 訊息
-                            token = 'phM16T6P9ZJ70Cd6POetxTjYAm7VwYlhbqlEoZvsplY'  # MySelf
+                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                             self.lineNotify(token, title + " " + url)
     def get_china_news(self,keyword):
         links = ['https://www.chinatimes.com/search/%E9%99%B3%E6%9F%8F%E6%83%9F?chdtv','https://www.chinatimes.com/search/%E5%9F%BA%E9%80%B2?chdtv']
@@ -336,8 +342,167 @@ class news_crawler(models.Model):
                                         'publisher': '中時新聞網',
                                         'url':url,
                                         'date': published_date
-                                    })
+                            })
+                            self.env.cr.commit()
                             if create_record:
                                 #發送 Line Notify 訊息
-                                token = 'phM16T6P9ZJ70Cd6POetxTjYAm7VwYlhbqlEoZvsplY'  # MySelf
+                                token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                                 self.lineNotify(token, title + " " + url)
+    def get_storm_news(self,keyword):
+        url = 'https://www.storm.mg/site-search/result?q='+ keyword +'&order=none&format=week'
+        headers = {
+            'authority': 'www.storm.mg',
+            'method': 'GET',
+            'scheme': 'https',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36'
+        }
+        res = requests.get(url=url,headers=headers)
+        soup = BeautifulSoup(res.text, 'html.parser')
+        titles = soup.select('p.card_title')
+        urls = soup.select('a.card_substance')
+        publish_dates = soup.select('span.info_time')
+        
+        for i in range(len(titles)):
+            title = titles[i].text
+            url = 'https://www.storm.mg' + urls[i].get('href')
+            publish_date = publish_dates[i].text
+            article = Article(url)
+            article.download()
+            article.parse()
+            dateFormatter = "%Y-%m-%d %H:%M"
+            published_date = datetime.strptime(publish_date, dateFormatter)
+            expect_time = datetime.today() - timedelta(hours=1)
+            if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
+                if published_date >= expect_time:
+                    if keyword in article.text:
+                        create_record = self.create({
+                                            'id':1,
+                                            'name': title,
+                                            'publisher': '風傳媒',
+                                            'url':url,
+                                            'date': published_date
+                                        })
+                        self.env.cr.commit()
+                        if create_record:
+                        #發送 Line Notify 訊息
+                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                            self.lineNotify(token, title + " " + url)
+    def get_ttv_news(self,keyword):
+        url = 'https://news.ttv.com.tw/search/' + keyword
+        headers = {
+            'method': 'GET',
+            'scheme': 'https',
+            'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'accept-language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+            'sec-ch-ua': '"Chromium";v="94", "Google Chrome";v="94", ";Not A Brand";v="99"',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36'
+        }
+        res = requests.get(url=url,headers=headers)
+        soup = BeautifulSoup(res.text, 'html.parser')
+        titles = soup.select('div.title')
+        urls = soup.select('ul > li > a.clearfix')
+        publishes = soup.select('div.time')
+
+        for i in range(len(urls)):
+            url = 'https://news.ttv.com.tw/'+urls[i].get('href')
+            title = titles[i+2].text
+            publish = publishes[i].text
+            article = Article(url)
+            article.download()
+            article.parse()
+            dateFormatter = "%Y/%m/%d %H:%M:%S"
+            published_date = datetime.strptime(publish, dateFormatter)
+            expect_time = datetime.today() - timedelta(hours=1)
+            if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
+                if published_date >= expect_time:
+                    if keyword in article.text:
+                        create_record = self.create({
+                                            'id':1,
+                                            'name': title,
+                                            'publisher': '台視新聞網',
+                                            'url':url,
+                                            'date': published_date})
+                        self.env.cr.commit()
+                        if create_record:
+                        #發送 Line Notify 訊息
+                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                            self.lineNotify(token, title + " " + url)
+    def get_ftv_news(keyword):
+        url = 'https://www.ftvnews.com.tw/search/' + keyword
+        headers = {
+            'method': 'GET',
+            'scheme': 'https',
+            'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'accept-language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+            'sec-ch-ua': '"Chromium";v="94", "Google Chrome";v="94", ";Not A Brand";v="99"',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36'
+        }
+        res = requests.get(url=url,headers=headers)
+        soup = BeautifulSoup(res.text, 'html.parser')
+        titles = soup.select('div.title')
+        urls = soup.select('ul > li > a.clearfix')
+        publishes = soup.select('div.time')
+        for i in range(len(urls)):
+            url = 'https://www.ftvnews.com.tw/'+urls[i].get('href')
+            title = titles[i].text
+            publish = publishes[i].text
+            article = Article(url)
+            article.download()
+            article.parse()
+            dateFormatter = "%Y/%m/%d %H:%M:%S"
+            published_date = datetime.strptime(publish, dateFormatter)
+            expect_time = datetime.today() - timedelta(hours=1)
+            if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
+                if published_date >= expect_time:
+                    if keyword in article.text:
+                        create_record = self.create({
+                                            'id':1,
+                                            'name': title,
+                                            'publisher': '民視新聞網',
+                                            'url':url,
+                                            'date': published_date})
+                        self.env.cr.commit()
+                        if create_record:
+                        #發送 Line Notify 訊息
+                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                            self.lineNotify(token, title + " " + url)
+    def get_cna_news(keyword):
+        url = 'https://www.cna.com.tw/search/hysearchws.aspx?q=' + keyword
+        headers = {
+            'method': 'GET',
+            'scheme': 'https',
+            'accept':'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+            'accept-language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7',
+            'sec-ch-ua': '"Chromium";v="94", "Google Chrome";v="94", ";Not A Brand";v="99"',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36'
+        }
+        res = requests.get(url=url,headers=headers)
+        soup = BeautifulSoup(res.text, 'html.parser')
+        urls = soup.select('ul.mainList > li > a')
+        titles = soup.select('div.listInfo > h2')
+        dates = soup.select('div.date')
+        for i in range(len(urls)):
+            url = urls[i].get('href')
+            title = titles[i].text
+            publish = dates[i].text
+            article = Article(url)
+            article.download()
+            article.parse()
+            dateFormatter = "%Y/%m/%d %H:%M"
+            published_date = datetime.strptime(publish, dateFormatter)
+            expect_time = datetime.today() - timedelta(hours=1)
+            if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
+                if published_date >= expect_time:
+                    if keyword in article.text:
+                        create_record = self.create({
+                                            'id':1,
+                                            'name': title,
+                                            'publisher': 'CNA中央社',
+                                            'url':url,
+                                            'date': published_date})
+                        self.env.cr.commit()
+                        if create_record:
+                        #發送 Line Notify 訊息
+                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                            self.lineNotify(token, title + " " + url)
