@@ -91,7 +91,7 @@ class news_crawler(models.Model):
                             'name': title,
                             'publisher': 'udn聯合新聞網',
                             'url': url,
-                            'date': published_date
+                            'date': published_date - timedelta(hours=8)
                         })
                         self.env.cr.commit()
                         if create_record:
@@ -129,7 +129,7 @@ class news_crawler(models.Model):
                         'name': title,
                         'publisher': news[i]['brandName'],
                         'url': url,
-                        'date': published_date
+                        'date': published_date - timedelta(hours=8)
                     })
                     self.env.cr.commit()
                     if create_record:
@@ -173,7 +173,7 @@ class news_crawler(models.Model):
                                 'name': title,
                                 'publisher': '自由時報電子報',
                                 'url':url,
-                                'date': published_date
+                                'date': published_date - timedelta(hours=8)
                         })
                         self.env.cr.commit()
                         if create_record:
@@ -215,7 +215,7 @@ class news_crawler(models.Model):
                                     'name': title,
                                     'publisher': '三立新聞網',
                                     'url':url,
-                                    'date': published_date
+                                    'date': published_date - timedelta(hours=8)
                         })
                         self.env.cr.commit()
                         if create_record:
@@ -258,7 +258,7 @@ class news_crawler(models.Model):
                                     'name': title,
                                     'publisher': 'ETtoday新聞雲',
                                     'url':url,
-                                    'date': published_date
+                                    'date': published_date - timedelta(hours=8)
                         })
                         self.env.cr.commit()
                         if create_record:
@@ -301,7 +301,7 @@ class news_crawler(models.Model):
                                     'name': title,
                                     'publisher': 'TVBS新聞網',
                                     'url':url,
-                                    'date': published_date
+                                    'date': published_date - timedelta(hours=8)
                         })
                         self.env.cr.commit()
                         if create_record:
@@ -341,7 +341,7 @@ class news_crawler(models.Model):
                                         'name': title,
                                         'publisher': '中時新聞網',
                                         'url':url,
-                                        'date': published_date
+                                        'date': published_date - timedelta(hours=8)
                             })
                             self.env.cr.commit()
                             if create_record:
@@ -381,7 +381,7 @@ class news_crawler(models.Model):
                                             'name': title,
                                             'publisher': '風傳媒',
                                             'url':url,
-                                            'date': published_date
+                                            'date': published_date - timedelta(hours=8)
                                         })
                         self.env.cr.commit()
                         if create_record:
@@ -422,7 +422,7 @@ class news_crawler(models.Model):
                                             'name': title,
                                             'publisher': '台視新聞網',
                                             'url':url,
-                                            'date': published_date})
+                                            'date': published_date - timedelta(hours=8)})
                         self.env.cr.commit()
                         if create_record:
                         #發送 Line Notify 訊息
@@ -461,7 +461,7 @@ class news_crawler(models.Model):
                                             'name': title,
                                             'publisher': '民視新聞網',
                                             'url':url,
-                                            'date': published_date})
+                                            'date': published_date - timedelta(hours=8)})
                         self.env.cr.commit()
                         if create_record:
                         #發送 Line Notify 訊息
@@ -500,7 +500,7 @@ class news_crawler(models.Model):
                                             'name': title,
                                             'publisher': 'CNA中央社',
                                             'url':url,
-                                            'date': published_date})
+                                            'date': published_date - timedelta(hours=8)})
                         self.env.cr.commit()
                         if create_record:
                         #發送 Line Notify 訊息
