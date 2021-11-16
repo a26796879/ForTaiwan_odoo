@@ -99,7 +99,7 @@ class news_crawler(models.Model):
                             token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                             self.lineNotify(token, title + " " + url)
     def get_apple_news(self,keyword):
-        apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22%25E5%259F%25BA%25E9%2580%25B2%22%2C%22start%22%3A-1%7D&d=262'
+        apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22%25E5%259F%25BA%25E9%2580%25B2%22%2C%22start%22%3A0%7D&d=264&_website=tw-appledaily'
         # 中時Ｘ TVBSＸ 自由時報Ｘ 三立Ｘ
         headers = {
             'accept': '*/*',
