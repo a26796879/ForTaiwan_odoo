@@ -55,7 +55,7 @@ class news_crawler(models.Model):
                                 #發送 Line Notify 訊息
                                 token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                                 self.lineNotify(token, title + " " + url)
-    def get_udn_news(self,keyword):
+    def get_udn_news(self,keyword): # not Article
         udn_url = 'https://udn.com/api/more?page=0&id=search:%E5%9F%BA%E9%80%B2&channelId=2&type=searchword'
         # 中時Ｘ TVBSＸ 自由時報Ｘ 三立Ｘ
         headers = {
@@ -75,11 +75,7 @@ class news_crawler(models.Model):
         for i in range(len(news)):
             url = news[i]['titleLink']
             title = news[i]['title']
-            article = Article(url)
-            article.download()
-            article.parse()
-            
-            if keyword in article.text and 'from' not in url:
+            if 'from' not in url:
                 if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
                     dateString = news[i]['time']['date']
                     dateFormatter = "%Y-%m-%d %H:%M:%S"
@@ -98,7 +94,7 @@ class news_crawler(models.Model):
                             #發送 Line Notify 訊息
                             token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                             self.lineNotify(token, title + " " + url)
-    def get_apple_news(self,keyword):
+    def get_apple_news(self,keyword): # not Article
         apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22%25E5%259F%25BA%25E9%2580%25B2%22%2C%22start%22%3A0%7D&d=264&_website=tw-appledaily'
         # 中時Ｘ TVBSＸ 自由時報Ｘ 三立Ｘ
         headers = {
@@ -162,24 +158,23 @@ class news_crawler(models.Model):
             article.download()
             article.parse()
             if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
-                if keyword in article.text:
-                    dateString = article.publish_date.strftime("%Y-%m-%d %H:%M:%S")
-                    dateFormatter = "%Y-%m-%d %H:%M:%S"
-                    published_date = datetime.strptime(dateString, dateFormatter)
-                    expect_time = datetime.today() - timedelta(hours=1)
-                    if published_date >= expect_time:
-                        create_record = self.create({
-                                'id':1,
-                                'name': title,
-                                'publisher': '自由時報電子報',
-                                'url':url,
-                                'date': published_date - timedelta(hours=8)
-                        })
-                        self.env.cr.commit()
-                        if create_record:
-                            #發送 Line Notify 訊息
-                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                            self.lineNotify(token, title + " " + url)
+                dateString = article.publish_date.strftime("%Y-%m-%d %H:%M:%S")
+                dateFormatter = "%Y-%m-%d %H:%M:%S"
+                published_date = datetime.strptime(dateString, dateFormatter)
+                expect_time = datetime.today() - timedelta(hours=1)
+                if published_date >= expect_time:
+                    create_record = self.create({
+                            'id':1,
+                            'name': title,
+                            'publisher': '自由時報電子報',
+                            'url':url,
+                            'date': published_date - timedelta(hours=8)
+                    })
+                    self.env.cr.commit()
+                    if create_record:
+                        #發送 Line Notify 訊息
+                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                        self.lineNotify(token, title + " " + url)
     def get_setn_news(self,keyword):
         url = 'https://www.setn.com/search.aspx?q=%E5%9F%BA%E9%80%B2&r=0'
         headers = {
@@ -204,25 +199,24 @@ class news_crawler(models.Model):
             article.download()
             article.parse()
             if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
-                if keyword in article.text:
-                    dateString = article.publish_date.strftime("%Y-%m-%d %H:%M:%S")
-                    dateFormatter = "%Y-%m-%d %H:%M:%S"
-                    published_date = datetime.strptime(dateString, dateFormatter)
-                    expect_time = datetime.today() - timedelta(hours=1)
-                    if published_date >= expect_time:
-                        create_record = self.create({
-                                    'id':1,
-                                    'name': title,
-                                    'publisher': '三立新聞網',
-                                    'url':url,
-                                    'date': published_date - timedelta(hours=8)
-                        })
-                        self.env.cr.commit()
-                        if create_record:
-                            #發送 Line Notify 訊息
-                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                            self.lineNotify(token, title + " " + url)
-    def get_ettoday_news(self,keyword):
+                dateString = article.publish_date.strftime("%Y-%m-%d %H:%M:%S")
+                dateFormatter = "%Y-%m-%d %H:%M:%S"
+                published_date = datetime.strptime(dateString, dateFormatter)
+                expect_time = datetime.today() - timedelta(hours=1)
+                if published_date >= expect_time:
+                    create_record = self.create({
+                                'id':1,
+                                'name': title,
+                                'publisher': '三立新聞網',
+                                'url':url,
+                                'date': published_date - timedelta(hours=8)
+                    })
+                    self.env.cr.commit()
+                    if create_record:
+                        #發送 Line Notify 訊息
+                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                        self.lineNotify(token, title + " " + url)
+    def get_ettoday_news(self,keyword): # not Article
         url = 'https://www.ettoday.net/news_search/doSearch.php?search_term_string=%E5%9F%BA%E9%80%B2'
         headers = {
             'authority': 'www.ettoday.net',
@@ -249,23 +243,19 @@ class news_crawler(models.Model):
             if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
                 expect_time = datetime.today() - timedelta(hours=1)
                 if published_date >= expect_time:
-                    article = Article(url)
-                    article.download()
-                    article.parse()
-                    if keyword in article.text:
-                        create_record = self.create({
-                                    'id':1,
-                                    'name': title,
-                                    'publisher': 'ETtoday新聞雲',
-                                    'url':url,
-                                    'date': published_date - timedelta(hours=8)
-                        })
-                        self.env.cr.commit()
-                        if create_record:
-                            #發送 Line Notify 訊息
-                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                            self.lineNotify(token, title + " " + url)
-    def get_TVBS_news(self,keyword):
+                    create_record = self.create({
+                                'id':1,
+                                'name': title,
+                                'publisher': 'ETtoday新聞雲',
+                                'url':url,
+                                'date': published_date - timedelta(hours=8)
+                    })
+                    self.env.cr.commit()
+                    if create_record:
+                        #發送 Line Notify 訊息
+                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                        self.lineNotify(token, title + " " + url)
+    def get_TVBS_news(self,keyword): # not Article
         url = 'https://news.tvbs.com.tw/news/searchresult/%E5%9F%BA%E9%80%B2/news'
         headers = {
             'authority': 'news.tvbs.com.tw',
@@ -290,24 +280,20 @@ class news_crawler(models.Model):
             dateFormatter = "%Y/%m/%d %H:%M"
             published_date = datetime.strptime(publish, dateFormatter)
             if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
-                article = Article(url)
-                article.download()
-                article.parse()
                 expect_time = datetime.today() - timedelta(hours=1)
                 if published_date >= expect_time:
-                    if keyword in article.text:
-                        create_record = self.create({
-                                    'id':1,
-                                    'name': title,
-                                    'publisher': 'TVBS新聞網',
-                                    'url':url,
-                                    'date': published_date - timedelta(hours=8)
-                        })
-                        self.env.cr.commit()
-                        if create_record:
-                            #發送 Line Notify 訊息
-                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                            self.lineNotify(token, title + " " + url)
+                    create_record = self.create({
+                                'id':1,
+                                'name': title,
+                                'publisher': 'TVBS新聞網',
+                                'url':url,
+                                'date': published_date - timedelta(hours=8)
+                    })
+                    self.env.cr.commit()
+                    if create_record:
+                        #發送 Line Notify 訊息
+                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                        self.lineNotify(token, title + " " + url)
     def get_china_news(self,keyword):
         links = ['https://www.chinatimes.com/search/%E9%99%B3%E6%9F%8F%E6%83%9F?chdtv','https://www.chinatimes.com/search/%E5%9F%BA%E9%80%B2?chdtv']
         headers = {
@@ -335,20 +321,19 @@ class news_crawler(models.Model):
                 expect_time = datetime.today() - timedelta(hours=1)
                 if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
                     if published_date >= expect_time:
-                        if keyword in article.text:
-                            create_record = self.create({
-                                        'id':1,
-                                        'name': title,
-                                        'publisher': '中時新聞網',
-                                        'url':url,
-                                        'date': published_date - timedelta(hours=8)
-                            })
-                            self.env.cr.commit()
-                            if create_record:
-                                #發送 Line Notify 訊息
-                                token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                                self.lineNotify(token, title + " " + url)
-    def get_storm_news(self,keyword):
+                        create_record = self.create({
+                                    'id':1,
+                                    'name': title,
+                                    'publisher': '中時新聞網',
+                                    'url':url,
+                                    'date': published_date - timedelta(hours=8)
+                        })
+                        self.env.cr.commit()
+                        if create_record:
+                            #發送 Line Notify 訊息
+                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                            self.lineNotify(token, title + " " + url)
+    def get_storm_news(self,keyword): # not Article
         url = 'https://www.storm.mg/site-search/result?q='+ keyword +'&order=none&format=week'
         headers = {
             'authority': 'www.storm.mg',
@@ -367,28 +352,24 @@ class news_crawler(models.Model):
             title = titles[i].text
             url = 'https://www.storm.mg' + urls[i].get('href')
             publish_date = publish_dates[i].text
-            article = Article(url)
-            article.download()
-            article.parse()
             dateFormatter = "%Y-%m-%d %H:%M"
             published_date = datetime.strptime(publish_date, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
-                    if keyword in article.text:
-                        create_record = self.create({
-                                            'id':1,
-                                            'name': title,
-                                            'publisher': '風傳媒',
-                                            'url':url,
-                                            'date': published_date - timedelta(hours=8)
-                                        })
-                        self.env.cr.commit()
-                        if create_record:
-                        #發送 Line Notify 訊息
-                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                            self.lineNotify(token, title + " " + url)
-    def get_ttv_news(self,keyword):
+                    create_record = self.create({
+                                        'id':1,
+                                        'name': title,
+                                        'publisher': '風傳媒',
+                                        'url':url,
+                                        'date': published_date - timedelta(hours=8)
+                                    })
+                    self.env.cr.commit()
+                    if create_record:
+                    #發送 Line Notify 訊息
+                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                        self.lineNotify(token, title + " " + url)
+    def get_ttv_news(self,keyword): # not Article
         url = 'https://news.ttv.com.tw/search/' + keyword
         headers = {
             'method': 'GET',
@@ -408,27 +389,23 @@ class news_crawler(models.Model):
             url = 'https://news.ttv.com.tw/'+urls[i].get('href')
             title = titles[i+2].text
             publish = publishes[i].text
-            article = Article(url)
-            article.download()
-            article.parse()
             dateFormatter = "%Y/%m/%d %H:%M:%S"
             published_date = datetime.strptime(publish, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
-                    if keyword in article.text:
-                        create_record = self.create({
-                                            'id':1,
-                                            'name': title,
-                                            'publisher': '台視新聞網',
-                                            'url':url,
-                                            'date': published_date - timedelta(hours=8)})
-                        self.env.cr.commit()
-                        if create_record:
-                        #發送 Line Notify 訊息
-                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                            self.lineNotify(token, title + " " + url)
-    def get_ftv_news(self,keyword):
+                    create_record = self.create({
+                                        'id':1,
+                                        'name': title,
+                                        'publisher': '台視新聞網',
+                                        'url':url,
+                                        'date': published_date - timedelta(hours=8)})
+                    self.env.cr.commit()
+                    if create_record:
+                    #發送 Line Notify 訊息
+                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                        self.lineNotify(token, title + " " + url)
+    def get_ftv_news(self,keyword): # not Article
         url = 'https://www.ftvnews.com.tw/search/' + keyword
         headers = {
             'method': 'GET',
@@ -447,27 +424,23 @@ class news_crawler(models.Model):
             url = 'https://www.ftvnews.com.tw/'+urls[i].get('href')
             title = titles[i].text
             publish = publishes[i].text
-            article = Article(url)
-            article.download()
-            article.parse()
             dateFormatter = "%Y/%m/%d %H:%M:%S"
             published_date = datetime.strptime(publish, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
-                    if keyword in article.text:
-                        create_record = self.create({
-                                            'id':1,
-                                            'name': title,
-                                            'publisher': '民視新聞網',
-                                            'url':url,
-                                            'date': published_date - timedelta(hours=8)})
-                        self.env.cr.commit()
-                        if create_record:
-                        #發送 Line Notify 訊息
-                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                            self.lineNotify(token, title + " " + url)
-    def get_cna_news(self,keyword):
+                    create_record = self.create({
+                                        'id':1,
+                                        'name': title,
+                                        'publisher': '民視新聞網',
+                                        'url':url,
+                                        'date': published_date - timedelta(hours=8)})
+                    self.env.cr.commit()
+                    if create_record:
+                    #發送 Line Notify 訊息
+                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                        self.lineNotify(token, title + " " + url)
+    def get_cna_news(self,keyword): # not Article
         url = 'https://www.cna.com.tw/search/hysearchws.aspx?q=' + keyword
         headers = {
             'method': 'GET',
@@ -486,23 +459,19 @@ class news_crawler(models.Model):
             url = urls[i].get('href')
             title = titles[i].text
             publish = dates[i].text
-            article = Article(url)
-            article.download()
-            article.parse()
             dateFormatter = "%Y/%m/%d %H:%M"
             published_date = datetime.strptime(publish, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
-                    if keyword in article.text:
-                        create_record = self.create({
-                                            'id':1,
-                                            'name': title,
-                                            'publisher': 'CNA中央社',
-                                            'url':url,
-                                            'date': published_date - timedelta(hours=8)})
-                        self.env.cr.commit()
-                        if create_record:
-                        #發送 Line Notify 訊息
-                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                            self.lineNotify(token, title + " " + url)
+                    create_record = self.create({
+                                        'id':1,
+                                        'name': title,
+                                        'publisher': 'CNA中央社',
+                                        'url':url,
+                                        'date': published_date - timedelta(hours=8)})
+                    self.env.cr.commit()
+                    if create_record:
+                    #發送 Line Notify 訊息
+                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                        self.lineNotify(token, title + " " + url)
