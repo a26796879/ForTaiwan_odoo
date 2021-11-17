@@ -175,7 +175,7 @@ class news_crawler(models.Model):
                         #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
-    def get_setn_news(self,keyword):
+    def get_setn_news(self,keyword):# not Article
         url = 'https://www.setn.com/search.aspx?q=%E5%9F%BA%E9%80%B2&r=0'
         headers = {
             'authority': 'www.setn.com',
@@ -192,22 +192,21 @@ class news_crawler(models.Model):
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.select('div.newsimg-area-text-2')
         url_tag = soup.select("div.newsimg-area-info >  a.gt ")
+        dates = soup.select('div.newsimg-date')
+        publisher = '三立新聞網'
         for i in range(len(titles)):
             title = titles[i].text
+            dateString = dates[i].text
             url = 'https://www.setn.com/' + url_tag[i].get('href').replace('&From=Search','')
-            article = Article(url)
-            article.download()
-            article.parse()
+            dateFormatter = "%Y/%m/%d %H:%M"
+            published_date = datetime.strptime(dateString, dateFormatter)
+            expect_time = datetime.today() - timedelta(hours=1)
             if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
-                dateString = article.publish_date.strftime("%Y-%m-%d %H:%M:%S")
-                dateFormatter = "%Y-%m-%d %H:%M:%S"
-                published_date = datetime.strptime(dateString, dateFormatter)
-                expect_time = datetime.today() - timedelta(hours=1)
                 if published_date >= expect_time:
                     create_record = self.create({
                                 'id':1,
                                 'name': title,
-                                'publisher': '三立新聞網',
+                                'publisher': publisher,
                                 'url':url,
                                 'date': published_date - timedelta(hours=8)
                     })
@@ -294,7 +293,7 @@ class news_crawler(models.Model):
                         #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
-    def get_china_news(self,keyword):
+    def get_china_news(self,keyword):# not Article
         links = ['https://www.chinatimes.com/search/%E9%99%B3%E6%9F%8F%E6%83%9F?chdtv','https://www.chinatimes.com/search/%E5%9F%BA%E9%80%B2?chdtv']
         headers = {
             'authority': 'www.chinatimes.com',
@@ -309,14 +308,13 @@ class news_crawler(models.Model):
             res = requests.get(url=link,headers=headers)
             soup = BeautifulSoup(res.text, 'html.parser')
             titles = soup.select('h3 > a')
+            dates = soup.select('time')
+            publisher = '中時新聞網'
             for i in range(len(titles)):
                 title = titles[i].text
                 url = titles[i].get('href')
-                article = Article(url)
-                article.download()
-                article.parse()
-                dateString = article.publish_date.strftime("%Y-%m-%d %H:%M:%S+08:00")
-                dateFormatter = "%Y-%m-%d %H:%M:%S+08:00"
+                dateString = dates[i].get('datetime')
+                dateFormatter = "%Y-%m-%d %H:%M"
                 published_date = datetime.strptime(dateString, dateFormatter)
                 expect_time = datetime.today() - timedelta(hours=1)
                 if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
@@ -324,7 +322,7 @@ class news_crawler(models.Model):
                         create_record = self.create({
                                     'id':1,
                                     'name': title,
-                                    'publisher': '中時新聞網',
+                                    'publisher': publisher,
                                     'url':url,
                                     'date': published_date - timedelta(hours=8)
                         })
