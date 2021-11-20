@@ -54,7 +54,7 @@ class news_crawler(models.Model):
                             token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                             self.lineNotify(token, title + " " + url)
     def get_udn_news(self,keyword): # not Article
-        udn_url = 'https://udn.com/api/more?page=0&id=search:'+ keyword +'&channelId=2&type=searchword'
+        udn_url = 'https://udn.com/api/more?page=0&id=search:'+ keyword.encode("utf-8").decode("latin1") +'&channelId=2&type=searchword'
         headers = {
             'accept': '*/*',
             'accept-encoding': 'gzip, deflate, br',
@@ -92,13 +92,13 @@ class news_crawler(models.Model):
                             token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                             self.lineNotify(token, title + " " + url)
     def get_apple_news(self,keyword): # not Article
-        apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22'+ keyword +'%22%2C%22start%22%3A0%7D&d=264&_website=tw-appledaily'
+        apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22'+ keyword.encode("utf-8").decode("latin1") +'%22%2C%22start%22%3A0%7D&d=264&_website=tw-appledaily'
         headers = {
             'accept': '*/*',
             'accept-encoding': 'gzip, deflate, br',
             'accept-language': 'zh-TW,zh;q=0.9',
             'if-none-match': 'W/"989a-QvaRHTovk4mLrItkm2o2tDX3w/4"',
-            'referer': 'https://tw.appledaily.com/search/'+ keyword +'/',
+            'referer': 'https://tw.appledaily.com/search/'+ keyword.encode("utf-8").decode("latin1") +'/',
             'sec-ch-ua': '"Chromium";v="92", " Not A;Brand";v="99", "Google Chrome";v="92"',
             'sec-ch-ua-mobile': '?0',
             'sec-fetch-dest': 'empty',
@@ -172,11 +172,11 @@ class news_crawler(models.Model):
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_setn_news(self,keyword):# not Article
-        url = 'https://www.setn.com/search.aspx?q='+ keyword +'&r=0'
+        url = 'https://www.setn.com/search.aspx?q='+ keyword.encode("utf-8").decode("latin1") +'&r=0'
         headers = {
             'authority': 'www.setn.com',
             'method': 'GET',
-            'path': '/search.aspx?q='+ keyword +'',
+            'path': '/search.aspx?q='+ keyword.encode("utf-8").decode("latin1") +'',
             'scheme': 'https',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'accept-encoding': 'gzip, deflate, br',
@@ -212,11 +212,11 @@ class news_crawler(models.Model):
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_ettoday_news(self,keyword): # not Article
-        url = 'https://www.ettoday.net/news_search/doSearch.php?search_term_string='+ keyword +''
+        url = 'https://www.ettoday.net/news_search/doSearch.php?search_term_string='+ keyword.encode("utf-8").decode("latin1") +''
         headers = {
             'authority': 'www.ettoday.net',
             'method': 'GET',
-            'path': '/news_search/doSearch.php?search_term_string='+ keyword +'',
+            'path': '/news_search/doSearch.php?search_term_string='+ keyword.encode("utf-8").decode("latin1") +'',
             'scheme': 'https',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'accept-encoding': 'gzip, deflate, br',
@@ -251,11 +251,11 @@ class news_crawler(models.Model):
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_TVBS_news(self,keyword): # not Article
-        url = 'https://news.tvbs.com.tw/news/searchresult/'+ keyword +'/news'
+        url = 'https://news.tvbs.com.tw/news/searchresult/'+ keyword.encode("utf-8").decode("latin1") +'/news'
         headers = {
             'authority': 'news.tvbs.com.tw',
             'method': 'GET',
-            'path': '/news/searchresult/'+ keyword +'/news',
+            'path': '/news/searchresult/'+ keyword.encode("utf-8").decode("latin1") +'/news',
             'scheme': 'https',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'accept-encoding': 'gzip, deflate, br',
@@ -290,7 +290,7 @@ class news_crawler(models.Model):
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_china_news(self,keyword):# not Article
-        url = 'https://www.chinatimes.com/search/'+ keyword +'?chdtv'
+        url = 'https://www.chinatimes.com/search/'+ keyword.encode("utf-8").decode("latin1") +'?chdtv'
         headers = {
             'authority': 'www.chinatimes.com',
             'method': 'GET',
@@ -327,7 +327,7 @@ class news_crawler(models.Model):
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_storm_news(self,keyword): # not Article
-        url = 'https://www.storm.mg/site-search/result?q='+ keyword +'&order=none&format=week'
+        url = 'https://www.storm.mg/site-search/result?q='+ keyword.encode("utf-8").decode("latin1") +'&order=none&format=week'
         headers = {
             'authority': 'www.storm.mg',
             'method': 'GET',
