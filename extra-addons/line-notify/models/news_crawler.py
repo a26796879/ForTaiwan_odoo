@@ -27,37 +27,34 @@ class news_crawler(models.Model):
         google_news = GNews(language='zh-Hant', country='TW', period='4h')
         news = google_news.get_news(keyword)
         news_count = len(news)
-        # title,publisher,url,published date
         for i in range(news_count):
-            article = Article(news[i]['url'])
-            article.download()
-            article.parse()
-            title = news[i]['title']
+            title = news[i]['title'].split(' - ')[0].replace('　',' ') #去除發布者 & 將全形space取代為半形space
             url = news[i]['url']
             publisher = news[i]['publisher']['title']
-            if keyword in article.text and 'from' not in url:
-                if 'yahoo' not in news[i]['url']:
-                    if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
-                        dateString = news[i]['published date']
-                        dateFormatter = "%a, %d %b %Y %H:%M:%S GMT"
-                        published_date = datetime.strptime(dateString, dateFormatter)
-                        expect_time = datetime.today() - timedelta(hours=4)
-                        if published_date >= expect_time:
-                            create_record = self.create({
-                                'id':1,
-                                'name': title,
-                                'publisher':publisher ,
-                                'url': url,
-                                'date': published_date
-                            })
-                            self.env.cr.commit()
-                            if create_record:
-                                #發送 Line Notify 訊息
-                                token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                                self.lineNotify(token, title + " " + url)
+            dateString = news[i]['published date']
+            dateFormatter = "%a, %d %b %Y %H:%M:%S GMT"
+            published_date = datetime.strptime(dateString, dateFormatter)
+            expect_time = datetime.today() - timedelta(hours=4)
+            article = Article(url)
+            article.download()
+            article.parse()
+            if keyword in article.text and 'from' not in url and 'yahoo' not in url:
+                if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
+                    if published_date >= expect_time:
+                        create_record = self.create({
+                            'id':1,
+                            'name': title,
+                            'publisher':publisher,
+                            'url': url,
+                            'date': published_date
+                        })
+                        self.env.cr.commit()
+                        if create_record:
+                            #發送 Line Notify 訊息
+                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                            self.lineNotify(token, title + " " + url)
     def get_udn_news(self,keyword): # not Article
-        udn_url = 'https://udn.com/api/more?page=0&id=search:%E5%9F%BA%E9%80%B2&channelId=2&type=searchword'
-        # 中時Ｘ TVBSＸ 自由時報Ｘ 三立Ｘ
+        udn_url = 'https://udn.com/api/more?page=0&id=search:'+ keyword +'&channelId=2&type=searchword'
         headers = {
             'accept': '*/*',
             'accept-encoding': 'gzip, deflate, br',
@@ -75,12 +72,12 @@ class news_crawler(models.Model):
         for i in range(len(news)):
             url = news[i]['titleLink']
             title = news[i]['title']
+            dateString = news[i]['time']['date']
+            dateFormatter = "%Y-%m-%d %H:%M:%S"
+            published_date = datetime.strptime(dateString, dateFormatter)
+            expect_time = datetime.today() - timedelta(hours=1)
             if 'from' not in url:
                 if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
-                    dateString = news[i]['time']['date']
-                    dateFormatter = "%Y-%m-%d %H:%M:%S"
-                    published_date = datetime.strptime(dateString, dateFormatter)
-                    expect_time = datetime.today() - timedelta(hours=1)
                     if published_date >= expect_time:
                         create_record = self.create({
                             'id':1,
@@ -95,14 +92,13 @@ class news_crawler(models.Model):
                             token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                             self.lineNotify(token, title + " " + url)
     def get_apple_news(self,keyword): # not Article
-        apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22%25E5%259F%25BA%25E9%2580%25B2%22%2C%22start%22%3A0%7D&d=264&_website=tw-appledaily'
-        # 中時Ｘ TVBSＸ 自由時報Ｘ 三立Ｘ
+        apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22'+ keyword +'%22%2C%22start%22%3A0%7D&d=264&_website=tw-appledaily'
         headers = {
             'accept': '*/*',
             'accept-encoding': 'gzip, deflate, br',
             'accept-language': 'zh-TW,zh;q=0.9',
             'if-none-match': 'W/"989a-QvaRHTovk4mLrItkm2o2tDX3w/4"',
-            'referer': 'https://tw.appledaily.com/search/%E5%9F%BA%E9%80%B2/',
+            'referer': 'https://tw.appledaily.com/search/'+ keyword +'/',
             'sec-ch-ua': '"Chromium";v="92", " Not A;Brand";v="99", "Google Chrome";v="92"',
             'sec-ch-ua-mobile': '?0',
             'sec-fetch-dest': 'empty',
@@ -115,10 +111,10 @@ class news_crawler(models.Model):
         for i in range(len(news)):
             url = news[i]['sharing']['url']
             title = news[i]['title']
+            dateString = news[i]['pubDate']
+            published_date = datetime.fromtimestamp(int(dateString))
+            expect_time = datetime.today() - timedelta(hours=1)
             if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
-                dateString = news[i]['pubDate']
-                published_date = datetime.fromtimestamp(int(dateString))
-                expect_time = datetime.today() - timedelta(hours=1)
                 if published_date >= expect_time:
                     create_record = self.create({
                         'id':1,
@@ -133,12 +129,12 @@ class news_crawler(models.Model):
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_ltn_news(self,keyword):
-        url = 'https://search.ltn.com.tw/list?keyword=%E5%9F%BA%E9%80%B2'
+        url = 'https://search.ltn.com.tw/list?keyword=' + keyword
         headers = {
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'accept-encoding': 'gzip, deflate, br',
             'accept-language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7',
-            'referer': 'https://search.ltn.com.tw/list?keyword=%E5%9F%BA%E9%80%B2',
+            'referer': 'https://search.ltn.com.tw/list?keyword=' + keyword,
             'sec-ch-ua': '"Chromium";v="94", "Google Chrome";v="94", ";Not A Brand";v="99"',
             'sec-ch-ua-platform': '"Windows"',
             'sec-fetch-dest': 'document',
@@ -150,10 +146,10 @@ class news_crawler(models.Model):
         }
         res = requests.get(url=url,headers=headers)
         soup = BeautifulSoup(res.text, 'html.parser')
-        tit_tag = soup.find_all("a", class_="tit")
-        for i in range(len(tit_tag)):
-            title = tit_tag[i]['title']
-            url = tit_tag[i]['href']
+        titles = soup.find_all("a", class_="tit")
+        for i in range(len(titles)):
+            title = titles[i]['title']
+            url = titles[i]['href']
             article = Article(url)
             article.download()
             article.parse()
@@ -176,11 +172,11 @@ class news_crawler(models.Model):
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_setn_news(self,keyword):# not Article
-        url = 'https://www.setn.com/search.aspx?q=%E5%9F%BA%E9%80%B2&r=0'
+        url = 'https://www.setn.com/search.aspx?q='+ keyword +'&r=0'
         headers = {
             'authority': 'www.setn.com',
             'method': 'GET',
-            'path': '/search.aspx?q=%E5%9F%BA%E9%80%B2',
+            'path': '/search.aspx?q='+ keyword +'',
             'scheme': 'https',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'accept-encoding': 'gzip, deflate, br',
@@ -216,11 +212,11 @@ class news_crawler(models.Model):
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_ettoday_news(self,keyword): # not Article
-        url = 'https://www.ettoday.net/news_search/doSearch.php?search_term_string=%E5%9F%BA%E9%80%B2'
+        url = 'https://www.ettoday.net/news_search/doSearch.php?search_term_string='+ keyword +''
         headers = {
             'authority': 'www.ettoday.net',
             'method': 'GET',
-            'path': '/news_search/doSearch.php?search_term_string=%E5%9F%BA%E9%80%B2',
+            'path': '/news_search/doSearch.php?search_term_string='+ keyword +'',
             'scheme': 'https',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'accept-encoding': 'gzip, deflate, br',
@@ -255,11 +251,11 @@ class news_crawler(models.Model):
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_TVBS_news(self,keyword): # not Article
-        url = 'https://news.tvbs.com.tw/news/searchresult/%E5%9F%BA%E9%80%B2/news'
+        url = 'https://news.tvbs.com.tw/news/searchresult/'+ keyword +'/news'
         headers = {
             'authority': 'news.tvbs.com.tw',
             'method': 'GET',
-            'path': '/news/searchresult/%E5%9F%BA%E9%80%B2/news',
+            'path': '/news/searchresult/'+ keyword +'/news',
             'scheme': 'https',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'accept-encoding': 'gzip, deflate, br',
@@ -294,7 +290,7 @@ class news_crawler(models.Model):
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_china_news(self,keyword):# not Article
-        links = ['https://www.chinatimes.com/search/%E9%99%B3%E6%9F%8F%E6%83%9F?chdtv','https://www.chinatimes.com/search/%E5%9F%BA%E9%80%B2?chdtv']
+        links = ['https://www.chinatimes.com/search/%E9%99%B3%E6%9F%8F%E6%83%9F?chdtv','https://www.chinatimes.com/search/'+ keyword +'?chdtv']
         headers = {
             'authority': 'www.chinatimes.com',
             'method': 'GET',
