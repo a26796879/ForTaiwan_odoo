@@ -81,6 +81,16 @@
             <field name="numbercall">-1</field>
             <field name="doall" eval="False"/>
         </record>
+        <record id="ir_cron_get_china_news_2" model="ir.cron">
+            <field name="name">get_china_news</field>
+            <field name="model_id" ref="model_news_crawler"></field>
+            <field name="state">code</field>
+            <field name="code">model.get_china_news('陳柏惟')</field>
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+        </record>
         <record id="ir_cron_get_storm_news" model="ir.cron">
             <field name="name">get_storm_news</field>
             <field name="model_id" ref="model_news_crawler"></field>
