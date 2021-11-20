@@ -1,7 +1,7 @@
 version: '3.1'
 services:
   web:
-    image: fortaiwan_odoo
+    image: a26796879/fortaiwan_odoo
     depends_on:
       - db
     ports:
