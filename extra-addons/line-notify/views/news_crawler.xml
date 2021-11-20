@@ -5,7 +5,7 @@
       <field name="name">news_crawler_list</field>
       <field name="model">news_crawler</field>
       <field name="arch" type="xml">
-        <tree>
+        <tree default_order='date desc'>
           <field name="name"/>
           <field name="publisher"/>
           <field name="url" widget="url"/>
