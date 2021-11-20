@@ -290,7 +290,7 @@ class news_crawler(models.Model):
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_china_news(self,keyword):# not Article
-        links = ['https://www.chinatimes.com/search/%E9%99%B3%E6%9F%8F%E6%83%9F?chdtv','https://www.chinatimes.com/search/'+ keyword +'?chdtv']
+        url = 'https://www.chinatimes.com/search/'+ keyword +'?chdtv'
         headers = {
             'authority': 'www.chinatimes.com',
             'method': 'GET',
@@ -300,33 +300,32 @@ class news_crawler(models.Model):
             'sec-ch-ua': '"Chromium";v="94", "Google Chrome";v="94", ";Not A Brand";v="99"',
             'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36'
         }
-        for link in links:
-            res = requests.get(url=link,headers=headers)
-            soup = BeautifulSoup(res.text, 'html.parser')
-            titles = soup.select('h3 > a')
-            dates = soup.select('time')
-            publisher = '中時新聞網'
-            for i in range(len(titles)):
-                title = titles[i].text
-                url = titles[i].get('href')
-                dateString = dates[i].get('datetime')
-                dateFormatter = "%Y-%m-%d %H:%M"
-                published_date = datetime.strptime(dateString, dateFormatter)
-                expect_time = datetime.today() - timedelta(hours=1)
-                if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
-                    if published_date >= expect_time:
-                        create_record = self.create({
-                                    'id':1,
-                                    'name': title,
-                                    'publisher': publisher,
-                                    'url':url,
-                                    'date': published_date - timedelta(hours=8)
-                        })
-                        self.env.cr.commit()
-                        if create_record:
-                            #發送 Line Notify 訊息
-                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                            self.lineNotify(token, title + " " + url)
+        res = requests.get(url=url,headers=headers)
+        soup = BeautifulSoup(res.text, 'html.parser')
+        titles = soup.select('h3 > a')
+        dates = soup.select('time')
+        publisher = '中時新聞網'
+        for i in range(len(titles)):
+            title = titles[i].text
+            url = titles[i].get('href')
+            dateString = dates[i].get('datetime')
+            dateFormatter = "%Y-%m-%d %H:%M"
+            published_date = datetime.strptime(dateString, dateFormatter)
+            expect_time = datetime.today() - timedelta(hours=1)
+            if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
+                if published_date >= expect_time:
+                    create_record = self.create({
+                            'id':1,
+                            'name': title,
+                            'publisher': publisher,
+                            'url':url,
+                            'date': published_date - timedelta(hours=8)
+                    })
+                    self.env.cr.commit()
+                    if create_record:
+                        #發送 Line Notify 訊息
+                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                        self.lineNotify(token, title + " " + url)
     def get_storm_news(self,keyword): # not Article
         url = 'https://www.storm.mg/site-search/result?q='+ keyword +'&order=none&format=week'
         headers = {
