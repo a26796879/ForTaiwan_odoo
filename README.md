@@ -12,5 +12,8 @@
 7. 可以依個人需求調整排程時間  
 
 TODO:  
-所有function取代\u3000 全形空格
-檢查是否已存在用 or
+所有function取代\u3000 全形空格  
+檢查是否已存在用 or  
+storm replace '?kw=基進&pi=0',''  
+ftv replace 'https://www.ftvnews.com.tw//','https://www.ftvnews.com.tw/'
+ltn replace 'https://m.ltn','https://news.ltn'
