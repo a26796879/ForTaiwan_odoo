@@ -129,12 +129,12 @@ class news_crawler(models.Model):
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_ltn_news(self,keyword):
-        url = 'https://search.ltn.com.tw/list?keyword=' + keyword
+        url = 'https://search.ltn.com.tw/list?keyword=' + keyword.encode("utf-8").decode("latin1")
         headers = {
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'accept-encoding': 'gzip, deflate, br',
             'accept-language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7',
-            'referer': 'https://search.ltn.com.tw/list?keyword=' + keyword,
+            'referer': 'https://search.ltn.com.tw/list?keyword=' + keyword.encode("utf-8").decode("latin1"),
             'sec-ch-ua': '"Chromium";v="94", "Google Chrome";v="94", ";Not A Brand";v="99"',
             'sec-ch-ua-platform': '"Windows"',
             'sec-fetch-dest': 'document',
@@ -363,7 +363,7 @@ class news_crawler(models.Model):
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_ttv_news(self,keyword): # not Article
-        url = 'https://news.ttv.com.tw/search/' + keyword
+        url = 'https://news.ttv.com.tw/search/' + keyword.encode("utf-8").decode("latin1")
         headers = {
             'method': 'GET',
             'scheme': 'https',
@@ -399,7 +399,7 @@ class news_crawler(models.Model):
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_ftv_news(self,keyword): # not Article
-        url = 'https://www.ftvnews.com.tw/search/' + keyword
+        url = 'https://www.ftvnews.com.tw/search/' + keyword.encode("utf-8").decode("latin1")
         headers = {
             'method': 'GET',
             'scheme': 'https',
@@ -434,7 +434,7 @@ class news_crawler(models.Model):
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
     def get_cna_news(self,keyword): # not Article
-        url = 'https://www.cna.com.tw/search/hysearchws.aspx?q=' + keyword
+        url = 'https://www.cna.com.tw/search/hysearchws.aspx?q=' + keyword.encode("utf-8").decode("latin1")
         headers = {
             'method': 'GET',
             'scheme': 'https',
