@@ -28,8 +28,8 @@ class news_crawler(models.Model):
         news = google_news.get_news(keyword)
         news_count = len(news)
         for i in range(news_count):
-            title = news[i]['title'].split(' - ')[0].replace('　',' ') #去除發布者 & 將全形space取代為半形space
-            url = news[i]['url']
+            title = news[i]['title'].split(' - ')[0].replace('\u3000',' ') #去除發布者 & 將全形space取代為半形space
+            url = news[i]['url'].replace('https://m.ltn','https://news.ltn') #如果有m版網址，將其取代
             publisher = news[i]['publisher']['title']
             dateString = news[i]['published date']
             dateFormatter = "%a, %d %b %Y %H:%M:%S GMT"
@@ -71,7 +71,7 @@ class news_crawler(models.Model):
         news = res.json()['lists']
         for i in range(len(news)):
             url = news[i]['titleLink']
-            title = news[i]['title']
+            title = news[i]['title'].replace('\u3000',' ') #將全形space取代為半形space
             dateString = news[i]['time']['date']
             dateFormatter = "%Y-%m-%d %H:%M:%S"
             published_date = datetime.strptime(dateString, dateFormatter)
@@ -110,7 +110,7 @@ class news_crawler(models.Model):
         news = res.json()['content']
         for i in range(len(news)):
             url = news[i]['sharing']['url']
-            title = news[i]['title']
+            title = news[i]['title'].replace('\u3000',' ') #將全形space取代為半形space
             dateString = news[i]['pubDate']
             published_date = datetime.fromtimestamp(int(dateString))
             expect_time = datetime.today() - timedelta(hours=1)
@@ -148,7 +148,7 @@ class news_crawler(models.Model):
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.find_all("a", class_="tit")
         for i in range(len(titles)):
-            title = titles[i]['title']
+            title = titles[i]['title'].replace('\u3000',' ') #將全形space取代為半形space
             url = titles[i]['href']
             article = Article(url)
             article.download()
@@ -191,7 +191,7 @@ class news_crawler(models.Model):
         dates = soup.select('div.newsimg-date')
         publisher = '三立新聞網'
         for i in range(len(titles)):
-            title = titles[i].text
+            title = titles[i].text.replace('\u3000',' ') #將全形space取代為半形space
             dateString = dates[i].text
             url = 'https://www.setn.com/' + url_tag[i].get('href').replace('&From=Search','')
             dateFormatter = "%Y/%m/%d %H:%M"
@@ -230,7 +230,7 @@ class news_crawler(models.Model):
         titles = soup.select('h2 > a')
         date = soup.select('span.date')
         for i in range(len(titles)):
-            title = titles[i].text
+            title = titles[i].text.replace('\u3000',' ') #將全形space取代為半形space
             url = titles[i].get('href')
             publish = date[i].text.split('/')[1].replace(' ','')
             dateFormatter = "%Y-%m-%d%H:%M)"
@@ -269,7 +269,7 @@ class news_crawler(models.Model):
         urls = soup.select('span.search_list_box > a')
         dates = soup.select('span.publish_date')
         for i in range(len(titles)):
-            title = titles[i].text
+            title = titles[i].text.replace('\u3000',' ') #將全形space取代為半形space
             url = urls[i].get('href')
             publish = dates[i].text
             dateFormatter = "%Y/%m/%d %H:%M"
@@ -306,7 +306,7 @@ class news_crawler(models.Model):
         dates = soup.select('time')
         publisher = '中時新聞網'
         for i in range(len(titles)):
-            title = titles[i].text
+            title = titles[i].text.replace('\u3000',' ') #將全形space取代為半形space
             url = titles[i].get('href')
             dateString = dates[i].get('datetime')
             dateFormatter = "%Y-%m-%d %H:%M"
@@ -342,8 +342,8 @@ class news_crawler(models.Model):
         publish_dates = soup.select('span.info_time')
         
         for i in range(len(titles)):
-            title = titles[i].text
-            url = 'https://www.storm.mg' + urls[i].get('href')
+            title = titles[i].text.replace('\u3000',' ') #將全形space取代為半形space
+            url = 'https://www.storm.mg' + urls[i].get('href').replace('?kw=基進&pi=0','')
             publish_date = publish_dates[i].text
             dateFormatter = "%Y-%m-%d %H:%M"
             published_date = datetime.strptime(publish_date, dateFormatter)
@@ -380,7 +380,7 @@ class news_crawler(models.Model):
 
         for i in range(len(urls)):
             url = 'https://news.ttv.com.tw/'+urls[i].get('href')
-            title = titles[i+2].text
+            title = titles[i+2].text.replace('\u3000',' ') #將全形space取代為半形space
             publish = publishes[i].text
             dateFormatter = "%Y/%m/%d %H:%M:%S"
             published_date = datetime.strptime(publish, dateFormatter)
@@ -414,8 +414,8 @@ class news_crawler(models.Model):
         urls = soup.select('ul > li > a.clearfix')
         publishes = soup.select('div.time')
         for i in range(len(urls)):
-            url = 'https://www.ftvnews.com.tw/'+urls[i].get('href')
-            title = titles[i].text
+            url = 'https://www.ftvnews.com.tw'+urls[i].get('href')
+            title = titles[i].text.replace('\u3000',' ') #將全形space取代為半形space
             publish = publishes[i].text
             dateFormatter = "%Y/%m/%d %H:%M:%S"
             published_date = datetime.strptime(publish, dateFormatter)
@@ -450,7 +450,7 @@ class news_crawler(models.Model):
         dates = soup.select('div.date')
         for i in range(len(urls)):
             url = urls[i].get('href')
-            title = titles[i].text
+            title = titles[i].text.replace('\u3000',' ') #將全形space取代為半形space
             publish = dates[i].text
             dateFormatter = "%Y/%m/%d %H:%M"
             published_date = datetime.strptime(publish, dateFormatter)
