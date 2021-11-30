@@ -15,7 +15,7 @@
             <field name="name">get_udn_news</field>
             <field name="model_id" ref="model_news_crawler"></field>
             <field name="state">code</field>
-            <field name="code">model.get_udn_news('基進')</field>
+            <field name="code">model.get_udn_news('%E5%9F%BA%E9%80%B2')</field>
             <field name="interval_number">5</field>
             <field name="interval_type">minutes</field>
             <field name="numbercall">-1</field>
@@ -25,7 +25,7 @@
             <field name="name">get_apple_news</field>
             <field name="model_id" ref="model_news_crawler"></field>
             <field name="state">code</field>
-            <field name="code">model.get_apple_news('基進')</field>
+            <field name="code">model.get_apple_news('%E5%9F%BA%E9%80%B2')</field>
             <field name="interval_number">5</field>
             <field name="interval_type">minutes</field>
             <field name="numbercall">-1</field>
@@ -35,7 +35,7 @@
             <field name="name">get_ltn_news</field>
             <field name="model_id" ref="model_news_crawler"></field>
             <field name="state">code</field>
-            <field name="code">model.get_ltn_news('基進')</field>
+            <field name="code">model.get_ltn_news('%E5%9F%BA%E9%80%B2')</field>
             <field name="interval_number">5</field>
             <field name="interval_type">minutes</field>
             <field name="numbercall">-1</field>
@@ -45,7 +45,7 @@
             <field name="name">get_setn_news</field>
             <field name="model_id" ref="model_news_crawler"></field>
             <field name="state">code</field>
-            <field name="code">model.get_setn_news('基進')</field>
+            <field name="code">model.get_setn_news('%E5%9F%BA%E9%80%B2')</field>
             <field name="interval_number">5</field>
             <field name="interval_type">minutes</field>
             <field name="numbercall">-1</field>
@@ -55,7 +55,7 @@
             <field name="name">get_ettoday_news</field>
             <field name="model_id" ref="model_news_crawler"></field>
             <field name="state">code</field>
-            <field name="code">model.get_ettoday_news('基進')</field>
+            <field name="code">model.get_ettoday_news('%E5%9F%BA%E9%80%B2')</field>
             <field name="interval_number">5</field>
             <field name="interval_type">minutes</field>
             <field name="numbercall">-1</field>
@@ -65,7 +65,7 @@
             <field name="name">get_TVBS_news</field>
             <field name="model_id" ref="model_news_crawler"></field>
             <field name="state">code</field>
-            <field name="code">model.get_TVBS_news('基進')</field>
+            <field name="code">model.get_TVBS_news('%E5%9F%BA%E9%80%B2')</field>
             <field name="interval_number">5</field>
             <field name="interval_type">minutes</field>
             <field name="numbercall">-1</field>
@@ -75,7 +75,7 @@
             <field name="name">get_china_news</field>
             <field name="model_id" ref="model_news_crawler"></field>
             <field name="state">code</field>
-            <field name="code">model.get_china_news('基進')</field>
+            <field name="code">model.get_china_news('%E5%9F%BA%E9%80%B2')</field>
             <field name="interval_number">5</field>
             <field name="interval_type">minutes</field>
             <field name="numbercall">-1</field>
@@ -95,7 +95,7 @@
             <field name="name">get_storm_news</field>
             <field name="model_id" ref="model_news_crawler"></field>
             <field name="state">code</field>
-            <field name="code">model.get_storm_news('基進')</field>
+            <field name="code">model.get_storm_news('%E5%9F%BA%E9%80%B2')</field>
             <field name="interval_number">5</field>
             <field name="interval_type">minutes</field>
             <field name="numbercall">-1</field>
@@ -105,7 +105,7 @@
             <field name="name">get_ttv_news</field>
             <field name="model_id" ref="model_news_crawler"></field>
             <field name="state">code</field>
-            <field name="code">model.get_ttv_news('基進')</field>
+            <field name="code">model.get_ttv_news('%E5%9F%BA%E9%80%B2')</field>
             <field name="interval_number">5</field>
             <field name="interval_type">minutes</field>
             <field name="numbercall">-1</field>
@@ -115,7 +115,7 @@
             <field name="name">get_ftv_news</field>
             <field name="model_id" ref="model_news_crawler"></field>
             <field name="state">code</field>
-            <field name="code">model.get_ftv_news('基進')</field>
+            <field name="code">model.get_ftv_news('%E5%9F%BA%E9%80%B2')</field>
             <field name="interval_number">5</field>
             <field name="interval_type">minutes</field>
             <field name="numbercall">-1</field>
@@ -125,7 +125,7 @@
             <field name="name">get_cna_news</field>
             <field name="model_id" ref="model_news_crawler"></field>
             <field name="state">code</field>
-            <field name="code">model.get_cna_news('基進')</field>
+            <field name="code">model.get_cna_news('%E5%9F%BA%E9%80%B2')</field>
             <field name="interval_number">5</field>
             <field name="interval_type">minutes</field>
             <field name="numbercall">-1</field>
