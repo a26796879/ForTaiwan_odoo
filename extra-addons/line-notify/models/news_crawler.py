@@ -53,8 +53,10 @@ class news_crawler(models.Model):
                             #發送 Line Notify 訊息
                             token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                             self.lineNotify(token, title + " " + url)
+                    else:
+                        break
     def get_udn_news(self,keyword): # not Article
-        udn_url = 'https://udn.com/api/more?page=0&id=search:'+ keyword.encode("utf-8").decode("latin1") +'&channelId=2&type=searchword'
+        udn_url = 'https://udn.com/api/more?page=0&id=search:'+ keyword +'&channelId=2&type=searchword'
         headers = {
             'accept': '*/*',
             'accept-encoding': 'gzip, deflate, br',
@@ -91,14 +93,16 @@ class news_crawler(models.Model):
                             #發送 Line Notify 訊息
                             token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                             self.lineNotify(token, title + " " + url)
+                    else:
+                        break
     def get_apple_news(self,keyword): # not Article
-        apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22'+ keyword.encode("utf-8").decode("latin1") +'%22%2C%22start%22%3A0%7D&d=264&_website=tw-appledaily'
+        apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22'+ keyword +'%22%2C%22start%22%3A0%7D&_website=tw-appledaily'
         headers = {
             'accept': '*/*',
             'accept-encoding': 'gzip, deflate, br',
             'accept-language': 'zh-TW,zh;q=0.9',
             'if-none-match': 'W/"989a-QvaRHTovk4mLrItkm2o2tDX3w/4"',
-            'referer': 'https://tw.appledaily.com/search/'+ keyword.encode("utf-8").decode("latin1") +'/',
+            'referer': 'https://tw.appledaily.com/search/'+ keyword +'/',
             'sec-ch-ua': '"Chromium";v="92", " Not A;Brand";v="99", "Google Chrome";v="92"',
             'sec-ch-ua-mobile': '?0',
             'sec-fetch-dest': 'empty',
@@ -128,13 +132,15 @@ class news_crawler(models.Model):
                         #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
-    def get_ltn_news(self,keyword):
-        url = 'https://search.ltn.com.tw/list?keyword=' + keyword.encode("utf-8").decode("latin1")
+                else:
+                    break
+    def get_ltn_news(self,keyword): # not Article
+        url = 'https://search.ltn.com.tw/list?keyword=' + keyword
         headers = {
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'accept-encoding': 'gzip, deflate, br',
             'accept-language': 'zh-TW,zh;q=0.9,en-US;q=0.8,en;q=0.7',
-            'referer': 'https://search.ltn.com.tw/list?keyword=' + keyword.encode("utf-8").decode("latin1"),
+            'referer': 'https://search.ltn.com.tw/list?keyword=' + keyword,
             'sec-ch-ua': '"Chromium";v="94", "Google Chrome";v="94", ";Not A Brand";v="99"',
             'sec-ch-ua-platform': '"Windows"',
             'sec-fetch-dest': 'document',
@@ -150,13 +156,12 @@ class news_crawler(models.Model):
         for i in range(len(titles)):
             title = titles[i]['title'].replace('\u3000',' ') #將全形space取代為半形space
             url = titles[i]['href']
-            article = Article(url)
-            article.download()
-            article.parse()
+            res = requests.get(url=url,headers=headers)
+            soup = BeautifulSoup(res.text, 'html.parser')
+            publish = soup.select('span.time')[0].text.replace('\n    ','')
             if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
-                dateString = article.publish_date.strftime("%Y-%m-%d %H:%M:%S")
-                dateFormatter = "%Y-%m-%d %H:%M:%S"
-                published_date = datetime.strptime(dateString, dateFormatter)
+                dateFormatter = "%Y/%m/%d %H:%M"
+                published_date = datetime.strptime(publish, dateFormatter)
                 expect_time = datetime.today() - timedelta(hours=1)
                 if published_date >= expect_time:
                     create_record = self.create({
@@ -171,12 +176,14 @@ class news_crawler(models.Model):
                         #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
+                else:
+                    break
     def get_setn_news(self,keyword):# not Article
-        url = 'https://www.setn.com/search.aspx?q='+ keyword.encode("utf-8").decode("latin1") +'&r=0'
+        url = 'https://www.setn.com/search.aspx?q='+ keyword +'&r=0'
         headers = {
             'authority': 'www.setn.com',
             'method': 'GET',
-            'path': '/search.aspx?q='+ keyword.encode("utf-8").decode("latin1") +'',
+            'path': '/search.aspx?q='+ keyword +'',
             'scheme': 'https',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'accept-encoding': 'gzip, deflate, br',
@@ -211,12 +218,14 @@ class news_crawler(models.Model):
                         #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
+                else:
+                    break
     def get_ettoday_news(self,keyword): # not Article
-        url = 'https://www.ettoday.net/news_search/doSearch.php?search_term_string='+ keyword.encode("utf-8").decode("latin1") +''
+        url = 'https://www.ettoday.net/news_search/doSearch.php?search_term_string='+ keyword +''
         headers = {
             'authority': 'www.ettoday.net',
             'method': 'GET',
-            'path': '/news_search/doSearch.php?search_term_string='+ keyword.encode("utf-8").decode("latin1") +'',
+            'path': '/news_search/doSearch.php?search_term_string='+ keyword +'',
             'scheme': 'https',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'accept-encoding': 'gzip, deflate, br',
@@ -250,12 +259,14 @@ class news_crawler(models.Model):
                         #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
+                else:
+                    break
     def get_TVBS_news(self,keyword): # not Article
-        url = 'https://news.tvbs.com.tw/news/searchresult/'+ keyword.encode("utf-8").decode("latin1") +'/news'
+        url = 'https://news.tvbs.com.tw/news/searchresult/'+ keyword +'/news'
         headers = {
             'authority': 'news.tvbs.com.tw',
             'method': 'GET',
-            'path': '/news/searchresult/'+ keyword.encode("utf-8").decode("latin1") +'/news',
+            'path': '/news/searchresult/'+ keyword +'/news',
             'scheme': 'https',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'accept-encoding': 'gzip, deflate, br',
@@ -289,8 +300,10 @@ class news_crawler(models.Model):
                         #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
+                else:
+                    break
     def get_china_news(self,keyword):# not Article
-        url = 'https://www.chinatimes.com/search/'+ keyword.encode("utf-8").decode("latin1") +'?chdtv'
+        url = 'https://www.chinatimes.com/search/'+ keyword +'?chdtv'
         headers = {
             'authority': 'www.chinatimes.com',
             'method': 'GET',
@@ -326,8 +339,10 @@ class news_crawler(models.Model):
                         #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
+                else:
+                    break
     def get_storm_news(self,keyword): # not Article
-        url = 'https://www.storm.mg/site-search/result?q='+ keyword.encode("utf-8").decode("latin1") +'&order=none&format=week'
+        url = 'https://www.storm.mg/site-search/result?q='+ keyword +'&order=none&format=week'
         headers = {
             'authority': 'www.storm.mg',
             'method': 'GET',
@@ -362,8 +377,10 @@ class news_crawler(models.Model):
                     #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
+                else:
+                    break
     def get_ttv_news(self,keyword): # not Article
-        url = 'https://news.ttv.com.tw/search/' + keyword.encode("utf-8").decode("latin1")
+        url = 'https://news.ttv.com.tw/search/' + keyword
         headers = {
             'method': 'GET',
             'scheme': 'https',
@@ -398,8 +415,10 @@ class news_crawler(models.Model):
                     #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
+                else:
+                    break
     def get_ftv_news(self,keyword): # not Article
-        url = 'https://www.ftvnews.com.tw/search/' + keyword.encode("utf-8").decode("latin1")
+        url = 'https://www.ftvnews.com.tw/search/' + keyword
         headers = {
             'method': 'GET',
             'scheme': 'https',
@@ -433,8 +452,10 @@ class news_crawler(models.Model):
                     #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
+                else:
+                    break
     def get_cna_news(self,keyword): # not Article
-        url = 'https://www.cna.com.tw/search/hysearchws.aspx?q=' + keyword.encode("utf-8").decode("latin1")
+        url = 'https://www.cna.com.tw/search/hysearchws.aspx?q=' + keyword
         headers = {
             'method': 'GET',
             'scheme': 'https',
@@ -468,3 +489,7 @@ class news_crawler(models.Model):
                     #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
+                else:
+                    break
+
+    #  .encode("utf-8").decode("latin1")
