@@ -125,7 +125,7 @@ class news_crawler(models.Model):
                         'name': title,
                         'publisher': news[i]['brandName'],
                         'url': url,
-                        'date': published_date - timedelta(hours=8)
+                        'date': published_date
                     })
                     self.env.cr.commit()
                     if create_record:
