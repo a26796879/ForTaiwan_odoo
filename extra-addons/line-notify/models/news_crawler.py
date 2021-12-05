@@ -2,9 +2,9 @@ from odoo import models, fields, api
 from gnews import GNews
 from newspaper import Article
 from datetime import datetime,timedelta
-import requests, json
+import requests, json, asyncio, time, urllib
 from bs4 import BeautifulSoup
-
+from requests_html import AsyncHTMLSession
 class news_crawler(models.Model):
     _name = 'news_crawler'
     _description = '根據關鍵字爬取 Google News'
@@ -53,7 +53,7 @@ class news_crawler(models.Model):
                             #發送 Line Notify 訊息
                             token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                             self.lineNotify(token, title + " " + url)
-    def get_udn_news(self,keyword): # not Article
+    async def get_udn_news(self,s,keyword): # not Article
         udn_url = 'https://udn.com/api/more?page=0&id=search:'+ keyword.encode("utf-8").decode("latin1") +'&channelId=2&type=searchword'
         headers = {
             'accept': '*/*',
@@ -91,7 +91,7 @@ class news_crawler(models.Model):
                             #發送 Line Notify 訊息
                             token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                             self.lineNotify(token, title + " " + url)
-    def get_apple_news(self,keyword): # not Article
+    async def get_apple_news(self,s,keyword): # not Article
         apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22'+ keyword.encode("utf-8").decode("latin1") +'%22%2C%22start%22%3A0%7D&d=264&_website=tw-appledaily'
         headers = {
             'accept': '*/*',
@@ -128,7 +128,7 @@ class news_crawler(models.Model):
                         #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
-    def get_ltn_news(self,keyword):
+    async def get_ltn_news(self,s,keyword):
         url = 'https://search.ltn.com.tw/list?keyword=' + keyword
         headers = {
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
@@ -171,7 +171,7 @@ class news_crawler(models.Model):
                         #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
-    def get_setn_news(self,keyword):# not Article
+    async def get_setn_news(self,s,keyword):# not Article
         url = 'https://www.setn.com/search.aspx?q='+ keyword.encode("utf-8").decode("latin1") +'&r=0'
         headers = {
             'authority': 'www.setn.com',
@@ -211,7 +211,7 @@ class news_crawler(models.Model):
                         #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
-    def get_ettoday_news(self,keyword): # not Article
+    async def get_ettoday_news(self,s,keyword): # not Article
         url = 'https://www.ettoday.net/news_search/doSearch.php?search_term_string='+ keyword.encode("utf-8").decode("latin1") +''
         headers = {
             'authority': 'www.ettoday.net',
@@ -250,7 +250,7 @@ class news_crawler(models.Model):
                         #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
-    def get_TVBS_news(self,keyword): # not Article
+    async def get_TVBS_news(self,s,keyword): # not Article
         url = 'https://news.tvbs.com.tw/news/searchresult/'+ keyword.encode("utf-8").decode("latin1") +'/news'
         headers = {
             'authority': 'news.tvbs.com.tw',
@@ -289,7 +289,7 @@ class news_crawler(models.Model):
                         #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
-    def get_china_news(self,keyword):# not Article
+    async def get_china_news(self,s,keyword):# not Article
         url = 'https://www.chinatimes.com/search/'+ keyword.encode("utf-8").decode("latin1") +'?chdtv'
         headers = {
             'authority': 'www.chinatimes.com',
@@ -326,7 +326,7 @@ class news_crawler(models.Model):
                         #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
-    def get_storm_news(self,keyword): # not Article
+    async def get_storm_news(self,s,keyword): # not Article
         url = 'https://www.storm.mg/site-search/result?q='+ keyword.encode("utf-8").decode("latin1") +'&order=none&format=week'
         headers = {
             'authority': 'www.storm.mg',
@@ -362,7 +362,7 @@ class news_crawler(models.Model):
                     #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
-    def get_ttv_news(self,keyword): # not Article
+    async def get_ttv_news(self,s,keyword): # not Article
         url = 'https://news.ttv.com.tw/search/' + keyword
         headers = {
             'method': 'GET',
@@ -398,7 +398,7 @@ class news_crawler(models.Model):
                     #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
-    def get_ftv_news(self,keyword): # not Article
+    async def get_ftv_news(self,s,keyword): # not Article
         url = 'https://www.ftvnews.com.tw/search/' + keyword
         headers = {
             'method': 'GET',
@@ -433,7 +433,7 @@ class news_crawler(models.Model):
                     #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
-    def get_cna_news(self,keyword): # not Article
+    async def get_cna_news(self,s,keyword): # not Article
         url = 'https://www.cna.com.tw/search/hysearchws.aspx?q=' + keyword
         headers = {
             'method': 'GET',
@@ -468,3 +468,20 @@ class news_crawler(models.Model):
                     #發送 Line Notify 訊息
                         token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
                         self.lineNotify(token, title + " " + url)
+
+    async def main(self,keyword):
+        s = AsyncHTMLSession()
+        udn_task = self.get_udn_news(s,keyword)
+        apple_task = self.get_apple_news(s,keyword)
+        setn_task = self.get_setn_news(s,keyword)
+        ettoday_task = self.get_ettoday_news(s,keyword)
+        tvbs_task = self.get_TVBS_news(s,keyword)
+        china_task = self.get_china_news(s,keyword)
+        storm_task = self.get_storm_news(s,keyword)
+        ttv_task = self.get_ttv_news(s,keyword)
+        ftv_task = self.get_ftv_news(s,keyword)
+        ltn_task = self.get_ltn_news(s,keyword)
+        cna_task = self.get_cna_news(s,keyword)
+        return await asyncio.gather(udn_task,apple_task,setn_task,ettoday_task,tvbs_task,china_task,storm_task,ttv_task,ftv_task,ltn_task,cna_task)
+    def run_main(self,keyword):
+        asyncio.run(self.main(keyword))
