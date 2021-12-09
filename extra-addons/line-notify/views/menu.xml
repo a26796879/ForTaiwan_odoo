@@ -13,7 +13,15 @@
       <field name="view_mode">tree,form</field>
     </record>
 
+    <record id="ir_cron_action" model="ir.actions.act_window">
+      <field name="name">ir_cron_action</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">ir.cron</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
     <menuitem name="TSP news" id="line-notify.menu_root"/>
     <menuitem id="menu_news_crawler_view" name="news_crawler" parent="line-notify.menu_root" action="news_crawler_action" sequence="1"/>
     <menuitem id="menu_config_token_view" name="config_token" parent="line-notify.menu_root" action="config_token_action" sequence="2"/>
+    <menuitem id="menu_ir_cron_action" name="ir_cron_action" parent="line-notify.menu_root" action="ir_cron_action" sequence="3"/>
 </odoo>
