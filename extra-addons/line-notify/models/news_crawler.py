@@ -159,28 +159,31 @@ class news_crawler(models.Model):
         for i in range(len(titles)):
             title = titles[i]['title'].replace('\u3000',' ') #將全形space取代為半形space
             url = titles[i]['href']
-            res = requests.get(url=url,headers=headers)
-            soup = BeautifulSoup(res.text, 'html.parser')
-            publish = soup.select('span.time')[0].text.replace('\n    ','')
-            if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
-                dateFormatter = "%Y/%m/%d %H:%M"
-                published_date = datetime.strptime(publish, dateFormatter)
-                expect_time = datetime.today() - timedelta(hours=7)
-                if published_date >= expect_time:
-                    create_record = self.create({
-                            'id':1,
-                            'name': title,
-                            'publisher': '自由時報電子報',
-                            'url':url,
-                            'date': published_date - timedelta(hours=8)
-                    })
-                    self.env.cr.commit()
-                    if create_record:
-                        #發送 Line Notify 訊息
-                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                        self.lineNotify(token, title + " 〔" + keyword + "〕 " + url)
-                else:
-                    break
+            try:
+                res = requests.get(url=url,headers=headers, timeout = 10)
+                soup = BeautifulSoup(res.text, 'html.parser')
+                publish = soup.select('span.time')[0].text.replace('\n    ','')
+                if len(self.env['news_crawler'].search([("url","=",url)])) == 0  and len(self.env['news_crawler'].search([("name","=",title)])) == 0:
+                    dateFormatter = "%Y/%m/%d %H:%M"
+                    published_date = datetime.strptime(publish, dateFormatter)
+                    expect_time = datetime.today() - timedelta(hours=7)
+                    if published_date >= expect_time:
+                        create_record = self.create({
+                                'id':1,
+                                'name': title,
+                                'publisher': '自由時報電子報',
+                                'url':url,
+                                'date': published_date - timedelta(hours=8)
+                        })
+                        self.env.cr.commit()
+                        if create_record:
+                            #發送 Line Notify 訊息
+                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
+                            self.lineNotify(token, title + " 〔" + keyword + "〕 " + url)
+                    else:
+                        break
+            except:
+                continue
     async def get_setn_news(self,s,keyword):# not Article
         url = 'https://www.setn.com/search.aspx?q='+ urllib.parse.quote_plus(keyword) +'&r=0'
         headers = {
