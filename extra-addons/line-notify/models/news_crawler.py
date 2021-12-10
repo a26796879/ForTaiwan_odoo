@@ -1,10 +1,13 @@
 from odoo import models, fields, api
 from gnews import GNews
-from newspaper import Article
+from newspaper import Article,Config
 from datetime import datetime,timedelta
-import requests, json, asyncio, time, urllib
+import requests, json, asyncio, time, urllib, newspaper, logging
 from bs4 import BeautifulSoup
 from requests_html import AsyncHTMLSession
+from fake_useragent import UserAgent
+_logger = logging.getLogger(__name__)
+
 class news_crawler(models.Model):
     _name = 'news_crawler'
     _description = '根據關鍵字爬取 Google News'
@@ -27,6 +30,10 @@ class news_crawler(models.Model):
         google_news = GNews(language='zh-Hant', country='TW', period='4h')
         news = google_news.get_news(keyword)
         news_count = len(news)
+        user_agent = UserAgent()
+        config = Config()
+        config.request_timeout = 10
+        config.browser_user_agent = user_agent.google
         for i in range(news_count):
             title = news[i]['title'].split(' - ')[0].replace('\u3000',' ') #去除發布者 & 將全形space取代為半形space
             url = news[i]['url'].replace('https://m.ltn','https://news.ltn') #如果有m版網址，將其取代
@@ -36,7 +43,10 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(dateString, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=4)
             try:
-                article = Article(url)
+                article = Article(url,config=config)
+                _logger.debug('===================================')
+                _logger.debug(url)
+                _logger.debug(config)
                 article.download()
                 article.parse()
                 if keyword in article.text and 'from' not in url and 'yahoo' not in url:
@@ -56,7 +66,7 @@ class news_crawler(models.Model):
                                 self.lineNotify(token, title + " 〔" + keyword + "〕 " + url)
                         else:
                             break
-            except:
+            except newspaper.article.ArticleException:
                 continue
     async def get_udn_news(self,s,keyword): # not Article
         udn_url = 'https://udn.com/api/more?page=0&id=search:'+ urllib.parse.quote_plus(keyword) +'&channelId=2&type=searchword'            
@@ -182,7 +192,7 @@ class news_crawler(models.Model):
                             self.lineNotify(token, title + " 〔" + keyword + "〕 " + url)
                     else:
                         break
-            except:
+            except requests.exceptions.RequestException as e:  # This is the correct syntax:
                 continue
     async def get_setn_news(self,s,keyword):# not Article
         url = 'https://www.setn.com/search.aspx?q='+ urllib.parse.quote_plus(keyword) +'&r=0'
