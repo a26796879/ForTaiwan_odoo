@@ -18,7 +18,7 @@ class news_crawler(models.Model):
     date = fields.Datetime('發布時間')
 
     headers = {
-        'user-agent': UserAgent(use_cache_server=False).google
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36'
     }
     def lineNotify(self,token, msg): #, picURI):
         url = "https://notify-api.line.me/api/notify"
