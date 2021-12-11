@@ -18,7 +18,7 @@ class news_crawler(models.Model):
     date = fields.Datetime('發布時間')
 
     headers = {
-        'user-agent': UserAgent().google
+        'user-agent': UserAgent(use_cache_server=False).google
     }
     def lineNotify(self,token, msg): #, picURI):
         url = "https://notify-api.line.me/api/notify"
@@ -44,7 +44,7 @@ class news_crawler(models.Model):
             dateString = news[i]['published date']
             dateFormatter = "%a, %d %b %Y %H:%M:%S GMT"
             published_date = datetime.strptime(dateString, dateFormatter)
-            expect_time = datetime.today() - timedelta(hours=4)
+            expect_time = datetime.today() - timedelta(hours=1)
             article = Article(url,config=config)
             try:
                 _logger.debug('===================================')
@@ -80,7 +80,7 @@ class news_crawler(models.Model):
             dateString = news[i]['time']['date']
             dateFormatter = "%Y-%m-%d %H:%M:%S"
             published_date = datetime.strptime(dateString, dateFormatter)
-            expect_time = datetime.today() - timedelta(hours=4)
+            expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(url)
             if 'from' not in url:
@@ -109,7 +109,7 @@ class news_crawler(models.Model):
             title = news[i]['title'].replace('\u3000',' ') #將全形space取代為半形space
             dateString = news[i]['pubDate']
             published_date = datetime.fromtimestamp(int(dateString))
-            expect_time = datetime.today() - timedelta(hours=4)
+            expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(url)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
@@ -145,7 +145,7 @@ class news_crawler(models.Model):
                 if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                     dateFormatter = "%Y/%m/%d %H:%M"
                     published_date = datetime.strptime(publish, dateFormatter)
-                    expect_time = datetime.today() - timedelta(hours=4)
+                    expect_time = datetime.today() - timedelta(hours=1)
                     if published_date >= expect_time:
                         create_record = self.create({
                                 'id':1,
@@ -177,7 +177,7 @@ class news_crawler(models.Model):
             url = 'https://www.setn.com/' + url_tag[i].get('href').replace('&From=Search','')
             dateFormatter = "%Y/%m/%d %H:%M"
             published_date = datetime.strptime(dateString, dateFormatter)
-            expect_time = datetime.today() - timedelta(hours=4)
+            expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(url)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
@@ -211,7 +211,7 @@ class news_crawler(models.Model):
             _logger.debug('===================================')
             _logger.debug(url)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
-                expect_time = datetime.today() - timedelta(hours=4)
+                expect_time = datetime.today() - timedelta(hours=1)
                 if published_date >= expect_time:
                     create_record = self.create({
                                 'id':1,
@@ -243,7 +243,7 @@ class news_crawler(models.Model):
             _logger.debug('===================================')
             _logger.debug(url)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
-                expect_time = datetime.today() - timedelta(hours=4)
+                expect_time = datetime.today() - timedelta(hours=1)
                 if published_date >= expect_time:
                     create_record = self.create({
                                 'id':1,
@@ -272,7 +272,7 @@ class news_crawler(models.Model):
             dateString = dates[i].get('datetime')
             dateFormatter = "%Y-%m-%d %H:%M"
             published_date = datetime.strptime(dateString, dateFormatter)
-            expect_time = datetime.today() - timedelta(hours=4)
+            expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(url)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
@@ -305,7 +305,7 @@ class news_crawler(models.Model):
             publish_date = publish_dates[i].text
             dateFormatter = "%Y-%m-%d %H:%M"
             published_date = datetime.strptime(publish_date, dateFormatter)
-            expect_time = datetime.today() - timedelta(hours=4)
+            expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(url)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
@@ -337,7 +337,7 @@ class news_crawler(models.Model):
             publish = publishes[i].text
             dateFormatter = "%Y/%m/%d %H:%M:%S"
             published_date = datetime.strptime(publish, dateFormatter)
-            expect_time = datetime.today() - timedelta(hours=4)
+            expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(url)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
@@ -368,7 +368,7 @@ class news_crawler(models.Model):
             publish = publishes[i].text
             dateFormatter = "%Y/%m/%d %H:%M:%S"
             published_date = datetime.strptime(publish, dateFormatter)
-            expect_time = datetime.today() - timedelta(hours=4)
+            expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(url)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
@@ -399,7 +399,7 @@ class news_crawler(models.Model):
             publish = dates[i].text
             dateFormatter = "%Y/%m/%d %H:%M"
             published_date = datetime.strptime(publish, dateFormatter)
-            expect_time = datetime.today() - timedelta(hours=4)
+            expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(url)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
