@@ -17,6 +17,7 @@ class news_crawler(models.Model):
     url = fields.Char('連結')
     date = fields.Datetime('發布時間')
 
+    token = 'here'
     headers = {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36'
     }
@@ -29,14 +30,13 @@ class news_crawler(models.Model):
         r = requests.post(url, headers = headers, params = payload)#, files = files)
         return r.status_code
 
-    def get_google_news(self,keyword):
+    def get_google_news(self,keyword,token=token):
         google_news = GNews(language='zh-Hant', country='TW', period='4h')
         news = google_news.get_news(keyword)
         news_count = len(news)
-        user_agent = UserAgent()
         config = Config()
         config.request_timeout = 10
-        config.browser_user_agent = user_agent.google
+        config.browser_user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36'
         for i in range(news_count):
             title = news[i]['title'].split(' - ')[0].replace('\u3000',' ') #去除發布者 & 將全形space取代為半形space
             url = news[i]['url'].replace('https://m.ltn','https://news.ltn') #如果有m版網址，將其取代
@@ -63,14 +63,13 @@ class news_crawler(models.Model):
                             })
                             self.env.cr.commit()
                             if create_record:
-                                #發送 Line Notify 訊息
-                                token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                                self.lineNotify(token, title + " 〔" + keyword + "〕 " + url)
+                                line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
+                                self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                         else:
                             break
             except newspaper.article.ArticleException:
                 continue
-    async def get_udn_news(self,s,keyword): # not Article
+    async def get_udn_news(self,s,keyword,token=token): # not Article
         udn_url = 'https://udn.com/api/more?page=0&id=search:'+ urllib.parse.quote_plus(keyword) +'&channelId=2&type=searchword'            
         res = requests.get(url=udn_url,headers=self.headers)
         news = res.json()['lists']
@@ -95,12 +94,11 @@ class news_crawler(models.Model):
                         })
                         self.env.cr.commit()
                         if create_record:
-                            #發送 Line Notify 訊息
-                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                            self.lineNotify(token, title + " 〔" + keyword + "〕 " + url)
+                            line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
+                            self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                     else:
                         break
-    async def get_apple_news(self,s,keyword): # not Article
+    async def get_apple_news(self,s,keyword,token=token): # not Article
         apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22'+ urllib.parse.quote_plus(keyword) +'%22%2C%22start%22%3A0%7D&_website=tw-appledaily'
         res = requests.get(url=apple_url,headers=self.headers)
         news = res.json()['content']
@@ -123,12 +121,11 @@ class news_crawler(models.Model):
                     })
                     self.env.cr.commit()
                     if create_record:
-                        #發送 Line Notify 訊息
-                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                        self.lineNotify(token, title + " 〔" + keyword + "〕 " + url)
+                        line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
+                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
-    async def get_ltn_news(self,s,keyword):
+    async def get_ltn_news(self,s,keyword,token=token):
         url = 'https://search.ltn.com.tw/list?keyword=' + urllib.parse.quote_plus(keyword)
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -156,14 +153,13 @@ class news_crawler(models.Model):
                         })
                         self.env.cr.commit()
                         if create_record:
-                            #發送 Line Notify 訊息
-                            token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                            self.lineNotify(token, title + " 〔" + keyword + "〕 " + url)
+                            line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
+                            self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                     else:
                         break
             except requests.exceptions.RequestException as e:  # This is the correct syntax:
                 continue
-    async def get_setn_news(self,s,keyword):# not Article
+    async def get_setn_news(self,s,keyword,token=token):# not Article
         url = 'https://www.setn.com/search.aspx?q='+ urllib.parse.quote_plus(keyword) +'&r=0'
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -191,12 +187,11 @@ class news_crawler(models.Model):
                     })
                     self.env.cr.commit()
                     if create_record:
-                        #發送 Line Notify 訊息
-                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                        self.lineNotify(token, title + " 〔" + keyword + "〕 " + url)
+                        line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
+                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
-    async def get_ettoday_news(self,s,keyword): # not Article
+    async def get_ettoday_news(self,s,keyword,token=token): # not Article
         url = 'https://www.ettoday.net/news_search/doSearch.php?search_term_string='+ urllib.parse.quote_plus(keyword)
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -222,12 +217,11 @@ class news_crawler(models.Model):
                     })
                     self.env.cr.commit()
                     if create_record:
-                        #發送 Line Notify 訊息
-                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                        self.lineNotify(token, title + " 〔" + keyword + "〕 " + url)
+                        line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
+                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
-    async def get_TVBS_news(self,s,keyword): # not Article
+    async def get_TVBS_news(self,s,keyword,token=token): # not Article
         url = 'https://news.tvbs.com.tw/news/searchresult/'+ urllib.parse.quote_plus(keyword) +'/news'
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -254,12 +248,11 @@ class news_crawler(models.Model):
                     })
                     self.env.cr.commit()
                     if create_record:
-                        #發送 Line Notify 訊息
-                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                        self.lineNotify(token, title + " 〔" + keyword + "〕 " + url)
+                        line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
+                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
-    async def get_china_news(self,s,keyword):# not Article
+    async def get_china_news(self,s,keyword,token=token):# not Article
         url = 'https://www.chinatimes.com/search/'+ urllib.parse.quote_plus(keyword) +'?chdtv'
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -286,12 +279,11 @@ class news_crawler(models.Model):
                     })
                     self.env.cr.commit()
                     if create_record:
-                        #發送 Line Notify 訊息
-                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                        self.lineNotify(token, title + " 〔" + keyword + "〕 " + url)
+                        line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
+                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
-    async def get_storm_news(self,s,keyword): # not Article
+    async def get_storm_news(self,s,keyword,token=token): # not Article
         url = 'https://www.storm.mg/site-search/result?q='+ urllib.parse.quote_plus(keyword) +'&order=none&format=week'
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -319,12 +311,11 @@ class news_crawler(models.Model):
                                     })
                     self.env.cr.commit()
                     if create_record:
-                    #發送 Line Notify 訊息
-                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                        self.lineNotify(token, title + " 〔" + keyword + "〕 " + url)
+                        line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
+                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
-    async def get_ttv_news(self,s,keyword): # not Article
+    async def get_ttv_news(self,s,keyword,token=token): # not Article
         url = 'https://news.ttv.com.tw/search/' + urllib.parse.quote_plus(keyword)
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -350,12 +341,11 @@ class news_crawler(models.Model):
                                         'date': published_date - timedelta(hours=8)})
                     self.env.cr.commit()
                     if create_record:
-                    #發送 Line Notify 訊息
-                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                        self.lineNotify(token, title + " 〔" + keyword + "〕 " + url)
+                        line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
+                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
-    async def get_ftv_news(self,s,keyword): # not Article
+    async def get_ftv_news(self,s,keyword,token=token): # not Article
         url = 'https://www.ftvnews.com.tw/search/' + urllib.parse.quote_plus(keyword)
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -381,12 +371,11 @@ class news_crawler(models.Model):
                                         'date': published_date - timedelta(hours=8)})
                     self.env.cr.commit()
                     if create_record:
-                    #發送 Line Notify 訊息
-                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                        self.lineNotify(token, title + " 〔" + keyword + "〕 " + url)
+                        line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
+                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
-    async def get_cna_news(self,s,keyword): # not Article
+    async def get_cna_news(self,s,keyword,token=token): # not Article
         url = 'https://www.cna.com.tw/search/hysearchws.aspx?q=' + urllib.parse.quote_plus(keyword)
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -412,9 +401,8 @@ class news_crawler(models.Model):
                                         'date': published_date - timedelta(hours=8)})
                     self.env.cr.commit()
                     if create_record:
-                    #發送 Line Notify 訊息
-                        token = self.env['config_token'].search([('env_name','=','here')]).line_token  # MySelf
-                        self.lineNotify(token, title + " 〔" + keyword + "〕 " + url)
+                        line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
+                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
     async def main(self,keyword):
