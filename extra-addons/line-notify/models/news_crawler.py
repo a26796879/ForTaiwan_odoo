@@ -48,7 +48,7 @@ class news_crawler(models.Model):
             article = Article(url,config=config)
             try:
                 _logger.debug('===================================')
-                _logger.debug(url)
+                _logger.debug(keyword,token)
                 article.download()
                 article.parse()
                 if keyword in article.text and 'from' not in url and 'yahoo' not in url:
@@ -81,7 +81,7 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(dateString, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(url)
+            _logger.debug(keyword,token)
             if 'from' not in url:
                 if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                     if published_date >= expect_time:
@@ -109,7 +109,7 @@ class news_crawler(models.Model):
             published_date = datetime.fromtimestamp(int(dateString))
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(url)
+            _logger.debug(keyword,token)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
@@ -134,7 +134,7 @@ class news_crawler(models.Model):
             title = titles[i]['title'].replace('\u3000',' ') #將全形space取代為半形space
             url = titles[i]['href']
             _logger.debug('===================================')
-            _logger.debug(url)
+            _logger.debug(keyword,token)
             try:
                 res = requests.get(url=url,headers=self.headers, timeout = 10)
                 soup = BeautifulSoup(res.text, 'html.parser')
@@ -175,7 +175,7 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(dateString, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(url)
+            _logger.debug(keyword,token)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
@@ -204,7 +204,7 @@ class news_crawler(models.Model):
             dateFormatter = "%Y-%m-%d%H:%M)"
             published_date = datetime.strptime(publish, dateFormatter)
             _logger.debug('===================================')
-            _logger.debug(url)
+            _logger.debug(keyword,token)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 expect_time = datetime.today() - timedelta(hours=1)
                 if published_date >= expect_time:
@@ -235,7 +235,7 @@ class news_crawler(models.Model):
             dateFormatter = "%Y/%m/%d %H:%M"
             published_date = datetime.strptime(publish, dateFormatter)
             _logger.debug('===================================')
-            _logger.debug(url)
+            _logger.debug(keyword,token)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 expect_time = datetime.today() - timedelta(hours=1)
                 if published_date >= expect_time:
@@ -267,7 +267,7 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(dateString, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(url)
+            _logger.debug(keyword,token)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
@@ -299,7 +299,7 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(publish_date, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(url)
+            _logger.debug(keyword,token)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
@@ -330,7 +330,7 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(publish, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(url)
+            _logger.debug(keyword,token)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
@@ -360,7 +360,7 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(publish, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(url)
+            _logger.debug(keyword,token)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
@@ -390,7 +390,7 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(publish, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(url)
+            _logger.debug(keyword,token)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
