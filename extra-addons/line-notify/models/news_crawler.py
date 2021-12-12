@@ -48,7 +48,7 @@ class news_crawler(models.Model):
             article = Article(url,config=config)
             try:
                 _logger.debug('===================================')
-                _logger.debug(keyword,token)
+                _logger.debug(keyword)
                 article.download()
                 article.parse()
                 if keyword in article.text and 'from' not in url and 'yahoo' not in url:
@@ -81,7 +81,7 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(dateString, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(keyword,token)
+            _logger.debug(keyword)
             if 'from' not in url:
                 if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                     if published_date >= expect_time:
@@ -109,7 +109,7 @@ class news_crawler(models.Model):
             published_date = datetime.fromtimestamp(int(dateString))
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(keyword,token)
+            _logger.debug(keyword)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
@@ -134,11 +134,13 @@ class news_crawler(models.Model):
             title = titles[i]['title'].replace('\u3000',' ') #將全形space取代為半形space
             url = titles[i]['href']
             _logger.debug('===================================')
-            _logger.debug(keyword,token)
+            _logger.debug(keyword)
             try:
                 res = requests.get(url=url,headers=self.headers, timeout = 10)
                 soup = BeautifulSoup(res.text, 'html.parser')
                 publish = soup.select('span.time')[0].text.replace('\n    ','')
+                if publish == "":
+                    publish = soup.select('span.time')[1].text.replace('\n    ','')
                 if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                     dateFormatter = "%Y/%m/%d %H:%M"
                     published_date = datetime.strptime(publish, dateFormatter)
@@ -175,7 +177,7 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(dateString, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(keyword,token)
+            _logger.debug(keyword)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
@@ -204,7 +206,7 @@ class news_crawler(models.Model):
             dateFormatter = "%Y-%m-%d%H:%M)"
             published_date = datetime.strptime(publish, dateFormatter)
             _logger.debug('===================================')
-            _logger.debug(keyword,token)
+            _logger.debug(keyword)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 expect_time = datetime.today() - timedelta(hours=1)
                 if published_date >= expect_time:
@@ -235,7 +237,7 @@ class news_crawler(models.Model):
             dateFormatter = "%Y/%m/%d %H:%M"
             published_date = datetime.strptime(publish, dateFormatter)
             _logger.debug('===================================')
-            _logger.debug(keyword,token)
+            _logger.debug(keyword)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 expect_time = datetime.today() - timedelta(hours=1)
                 if published_date >= expect_time:
@@ -267,7 +269,7 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(dateString, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(keyword,token)
+            _logger.debug(keyword)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
@@ -299,7 +301,7 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(publish_date, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(keyword,token)
+            _logger.debug(keyword)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
@@ -330,7 +332,7 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(publish, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(keyword,token)
+            _logger.debug(keyword)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
@@ -360,7 +362,7 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(publish, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(keyword,token)
+            _logger.debug(keyword)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
@@ -390,7 +392,7 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(publish, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(keyword,token)
+            _logger.debug(keyword)
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
@@ -405,19 +407,19 @@ class news_crawler(models.Model):
                         self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
-    async def main(self,keyword):
+    async def main(self,keyword,token=token):
         s = AsyncHTMLSession()
-        udn_task = self.get_udn_news(s,keyword)
-        apple_task = self.get_apple_news(s,keyword)
-        setn_task = self.get_setn_news(s,keyword)
-        ettoday_task = self.get_ettoday_news(s,keyword)
-        tvbs_task = self.get_TVBS_news(s,keyword)
-        china_task = self.get_china_news(s,keyword)
-        storm_task = self.get_storm_news(s,keyword)
-        ttv_task = self.get_ttv_news(s,keyword)
-        ftv_task = self.get_ftv_news(s,keyword)
-        ltn_task = self.get_ltn_news(s,keyword)
-        cna_task = self.get_cna_news(s,keyword)
+        udn_task = self.get_udn_news(s,keyword,token=token)
+        apple_task = self.get_apple_news(s,keyword,token=token)
+        setn_task = self.get_setn_news(s,keyword,token=token)
+        ettoday_task = self.get_ettoday_news(s,keyword,token=token)
+        tvbs_task = self.get_TVBS_news(s,keyword,token=token)
+        china_task = self.get_china_news(s,keyword,token=token)
+        storm_task = self.get_storm_news(s,keyword,token=token)
+        ttv_task = self.get_ttv_news(s,keyword,token=token)
+        ftv_task = self.get_ftv_news(s,keyword,token=token)
+        ltn_task = self.get_ltn_news(s,keyword,token=token)
+        cna_task = self.get_cna_news(s,keyword,token=token)
         return await asyncio.gather(udn_task,apple_task,setn_task,ettoday_task,tvbs_task,china_task,storm_task,ttv_task,ftv_task,ltn_task,cna_task)
-    def run_main(self,keyword):
-        asyncio.run(self.main(keyword))
+    def run_main(self,keyword,token=token):
+        asyncio.run(self.main(keyword,token=token))
