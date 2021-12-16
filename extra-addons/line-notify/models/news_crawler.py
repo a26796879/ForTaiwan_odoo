@@ -67,6 +67,8 @@ class news_crawler(models.Model):
                                 self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                         else:
                             break
+                    else:
+                        break
             except newspaper.article.ArticleException:
                 continue
     async def get_udn_news(self,s,keyword,token=token): # not Article
@@ -98,6 +100,8 @@ class news_crawler(models.Model):
                             self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                     else:
                         break
+                else:
+                    break
     async def get_apple_news(self,s,keyword,token=token): # not Article
         apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22'+ urllib.parse.quote_plus(keyword) +'%22%2C%22start%22%3A0%7D&_website=tw-appledaily'
         res = requests.get(url=apple_url,headers=self.headers)
@@ -125,6 +129,8 @@ class news_crawler(models.Model):
                         self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
+            else:
+                break
     async def get_ltn_news(self,s,keyword,token=token):
         url = 'https://search.ltn.com.tw/list?keyword=' + urllib.parse.quote_plus(keyword)
         res = requests.get(url=url,headers=self.headers)
@@ -159,6 +165,8 @@ class news_crawler(models.Model):
                             self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                     else:
                         break
+                else:
+                    break
             except requests.exceptions.RequestException as e:  # This is the correct syntax:
                 continue
     async def get_setn_news(self,s,keyword,token=token):# not Article
@@ -193,6 +201,8 @@ class news_crawler(models.Model):
                         self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
+            else:
+                break
     async def get_ettoday_news(self,s,keyword,token=token): # not Article
         url = 'https://www.ettoday.net/news_search/doSearch.php?search_term_string='+ urllib.parse.quote_plus(keyword)
         res = requests.get(url=url,headers=self.headers)
@@ -223,6 +233,8 @@ class news_crawler(models.Model):
                         self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
+            else:
+                break
     async def get_TVBS_news(self,s,keyword,token=token): # not Article
         url = 'https://news.tvbs.com.tw/news/searchresult/'+ urllib.parse.quote_plus(keyword) +'/news'
         res = requests.get(url=url,headers=self.headers)
@@ -254,6 +266,8 @@ class news_crawler(models.Model):
                         self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
+            else:
+                break
     async def get_china_news(self,s,keyword,token=token):# not Article
         url = 'https://www.chinatimes.com/search/'+ urllib.parse.quote_plus(keyword) +'?chdtv'
         res = requests.get(url=url,headers=self.headers)
@@ -285,6 +299,8 @@ class news_crawler(models.Model):
                         self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
+            else:
+                break
     async def get_storm_news(self,s,keyword,token=token): # not Article
         url = 'https://www.storm.mg/site-search/result?q='+ urllib.parse.quote_plus(keyword) +'&order=none&format=week'
         res = requests.get(url=url,headers=self.headers)
@@ -317,6 +333,8 @@ class news_crawler(models.Model):
                         self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
+            else:
+                break
     async def get_ttv_news(self,s,keyword,token=token): # not Article
         url = 'https://news.ttv.com.tw/search/' + urllib.parse.quote_plus(keyword)
         res = requests.get(url=url,headers=self.headers)
@@ -347,6 +365,8 @@ class news_crawler(models.Model):
                         self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
+            else:
+                break
     async def get_ftv_news(self,s,keyword,token=token): # not Article
         url = 'https://www.ftvnews.com.tw/search/' + urllib.parse.quote_plus(keyword)
         res = requests.get(url=url,headers=self.headers)
@@ -377,6 +397,8 @@ class news_crawler(models.Model):
                         self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
+            else:
+                break
     async def get_cna_news(self,s,keyword,token=token): # not Article
         url = 'https://www.cna.com.tw/search/hysearchws.aspx?q=' + urllib.parse.quote_plus(keyword)
         res = requests.get(url=url,headers=self.headers)
@@ -407,6 +429,8 @@ class news_crawler(models.Model):
                         self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
+            else:
+                break
     async def main(self,keyword,token=token):
         s = AsyncHTMLSession()
         udn_task = self.get_udn_news(s,keyword,token=token)
