@@ -344,7 +344,7 @@ class news_crawler(models.Model):
         publishes = soup.select('div.time')
         for i in range(len(urls)):
             url = 'https://news.ttv.com.tw/'+urls[i].get('href')
-            title = titles[i+2].text.replace('\u3000',' ') #將全形space取代為半形space
+            title = titles[i+3].text.replace('\u3000',' ') #將全形space取代為半形space
             publish = publishes[i].text
             dateFormatter = "%Y/%m/%d %H:%M:%S"
             published_date = datetime.strptime(publish, dateFormatter)
