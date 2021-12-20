@@ -10,7 +10,7 @@ _logger = logging.getLogger(__name__)
 
 class news_crawler(models.Model):
     _name = 'news_crawler'
-    _description = '根據關鍵字爬取 Google News'
+    _description = '根據關鍵字爬取 News'
 
     name = fields.Char('新聞標題')
     publisher = fields.Char('發布者')
@@ -36,7 +36,7 @@ class news_crawler(models.Model):
         news_count = len(news)
         config = Config()
         config.request_timeout = 10
-        config.browser_user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36'
+        config.browser_user_agent = self.headers['user-agent']
         for i in range(news_count):
             title = news[i]['title'].split(' - ')[0].replace('\u3000',' ') #去除發布者 & 將全形space取代為半形space
             url = news[i]['url'].replace('https://m.ltn','https://news.ltn') #如果有m版網址，將其取代
@@ -48,7 +48,7 @@ class news_crawler(models.Model):
             article = Article(url,config=config)
             try:
                 _logger.debug('===================================')
-                _logger.debug(keyword)
+                _logger.debug(f'keyword: {keyword} publisher: {publisher} token: {token}')
                 article.download()
                 article.parse()
                 if keyword in article.text and 'from' not in url and 'yahoo' not in url:
@@ -71,10 +71,11 @@ class news_crawler(models.Model):
                         break
             except newspaper.article.ArticleException:
                 continue
-    async def get_udn_news(self,s,keyword,token=token): # not Article
+    async def get_udn_news(self,s,keyword,token=token): 
         udn_url = 'https://udn.com/api/more?page=0&id=search:'+ urllib.parse.quote_plus(keyword) +'&channelId=2&type=searchword'            
         res = requests.get(url=udn_url,headers=self.headers)
         news = res.json()['lists']
+        publisher = 'UDN聯合新聞網'
         for i in range(len(news)):
             url = news[i]['titleLink']
             title = news[i]['title'].replace('\u3000',' ') #將全形space取代為半形space
@@ -83,14 +84,14 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(dateString, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(keyword)
+            _logger.debug(f'keyword: {keyword} publisher: {publisher} token: {token}')
             if 'from' not in url:
                 if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                     if published_date >= expect_time:
                         create_record = self.create({
                             'id':1,
                             'name': title,
-                            'publisher': 'UDN聯合新聞網',
+                            'publisher': publisher,
                             'url': url,
                             'date': published_date - timedelta(hours=8)
                         })
@@ -102,7 +103,7 @@ class news_crawler(models.Model):
                         break
                 else:
                     break
-    async def get_apple_news(self,s,keyword,token=token): # not Article
+    async def get_apple_news(self,s,keyword,token=token): 
         apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22'+ urllib.parse.quote_plus(keyword) +'%22%2C%22start%22%3A0%7D&_website=tw-appledaily'
         res = requests.get(url=apple_url,headers=self.headers)
         news = res.json()['content']
@@ -110,16 +111,17 @@ class news_crawler(models.Model):
             url = news[i]['sharing']['url']
             title = news[i]['title'].replace('\u3000',' ') #將全形space取代為半形space
             dateString = news[i]['pubDate']
+            publisher = news[i]['brandName']
             published_date = datetime.fromtimestamp(int(dateString))
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(keyword)
+            _logger.debug(f'keyword: {keyword} publisher: {publisher} token: {token}')    
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
                         'id':1,
                         'name': title,
-                        'publisher': news[i]['brandName'],
+                        'publisher': publisher,
                         'url': url,
                         'date': published_date
                     })
@@ -136,11 +138,12 @@ class news_crawler(models.Model):
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.find_all("a", class_="tit")
+        publisher = '自由時報電子報'
         for i in range(len(titles)):
             title = titles[i]['title'].replace('\u3000',' ') #將全形space取代為半形space
             url = titles[i]['href']
             _logger.debug('===================================')
-            _logger.debug(keyword)
+            _logger.debug(f'keyword: {keyword} publisher: {publisher} token: {token}')    
             try:
                 res = requests.get(url=url,headers=self.headers, timeout = 10)
                 soup = BeautifulSoup(res.text, 'html.parser')
@@ -155,7 +158,7 @@ class news_crawler(models.Model):
                         create_record = self.create({
                                 'id':1,
                                 'name': title,
-                                'publisher': '自由時報電子報',
+                                'publisher': publisher,
                                 'url':url,
                                 'date': published_date - timedelta(hours=8)
                         })
@@ -169,7 +172,7 @@ class news_crawler(models.Model):
                     break
             except requests.exceptions.RequestException as e:  # This is the correct syntax:
                 continue
-    async def get_setn_news(self,s,keyword,token=token):# not Article
+    async def get_setn_news(self,s,keyword,token=token):
         url = 'https://www.setn.com/search.aspx?q='+ urllib.parse.quote_plus(keyword) +'&r=0'
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -185,7 +188,7 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(dateString, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(keyword)
+            _logger.debug(f'keyword: {keyword} publisher: {publisher} token: {token}')    
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
@@ -203,12 +206,13 @@ class news_crawler(models.Model):
                     break
             else:
                 break
-    async def get_ettoday_news(self,s,keyword,token=token): # not Article
+    async def get_ettoday_news(self,s,keyword,token=token): 
         url = 'https://www.ettoday.net/news_search/doSearch.php?search_term_string='+ urllib.parse.quote_plus(keyword)
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.select('h2 > a')
         date = soup.select('span.date')
+        publisher = 'ETtoday新聞雲'
         for i in range(len(titles)):
             title = titles[i].text.replace('\u3000',' ') #將全形space取代為半形space
             url = titles[i].get('href')
@@ -216,14 +220,14 @@ class news_crawler(models.Model):
             dateFormatter = "%Y-%m-%d%H:%M)"
             published_date = datetime.strptime(publish, dateFormatter)
             _logger.debug('===================================')
-            _logger.debug(keyword)
+            _logger.debug(f'keyword: {keyword} publisher: {publisher} token: {token}')    
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 expect_time = datetime.today() - timedelta(hours=1)
                 if published_date >= expect_time:
                     create_record = self.create({
                                 'id':1,
                                 'name': title,
-                                'publisher': 'ETtoday新聞雲',
+                                'publisher': publisher,
                                 'url':url,
                                 'date': published_date - timedelta(hours=8)
                     })
@@ -235,13 +239,14 @@ class news_crawler(models.Model):
                     break
             else:
                 break
-    async def get_TVBS_news(self,s,keyword,token=token): # not Article
+    async def get_TVBS_news(self,s,keyword,token=token): 
         url = 'https://news.tvbs.com.tw/news/searchresult/'+ urllib.parse.quote_plus(keyword) +'/news'
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.select('h2.search_list_txt')
         urls = soup.select('span.search_list_box > a')
         dates = soup.select('span.publish_date')
+        publisher = 'TVBS新聞網'
         for i in range(len(titles)):
             title = titles[i].text.replace('\u3000',' ') #將全形space取代為半形space
             url = urls[i].get('href')
@@ -249,14 +254,14 @@ class news_crawler(models.Model):
             dateFormatter = "%Y/%m/%d %H:%M"
             published_date = datetime.strptime(publish, dateFormatter)
             _logger.debug('===================================')
-            _logger.debug(keyword)
+            _logger.debug(f'keyword: {keyword} publisher: {publisher} token: {token}')    
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 expect_time = datetime.today() - timedelta(hours=1)
                 if published_date >= expect_time:
                     create_record = self.create({
                                 'id':1,
                                 'name': title,
-                                'publisher': 'TVBS新聞網',
+                                'publisher': publisher,
                                 'url':url,
                                 'date': published_date - timedelta(hours=8)
                     })
@@ -268,7 +273,7 @@ class news_crawler(models.Model):
                     break
             else:
                 break
-    async def get_china_news(self,s,keyword,token=token):# not Article
+    async def get_china_news(self,s,keyword,token=token):
         url = 'https://www.chinatimes.com/search/'+ urllib.parse.quote_plus(keyword) +'?chdtv'
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -283,7 +288,7 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(dateString, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(keyword)
+            _logger.debug(f'keyword: {keyword} publisher: {publisher} token: {token}')    
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
@@ -301,29 +306,29 @@ class news_crawler(models.Model):
                     break
             else:
                 break
-    async def get_storm_news(self,s,keyword,token=token): # not Article
+    async def get_storm_news(self,s,keyword,token=token): 
         url = 'https://www.storm.mg/site-search/result?q='+ urllib.parse.quote_plus(keyword) +'&order=none&format=week'
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.select('p.card_title')
         urls = soup.select('a.card_substance')
         publish_dates = soup.select('span.info_time')
-        
+        publisher = '風傳媒'
         for i in range(len(titles)):
             title = titles[i].text.replace('\u3000',' ') #將全形space取代為半形space
-            url = 'https://www.storm.mg' + urls[i].get('href').replace('?kw=基進&pi=0','')
+            url = 'https://www.storm.mg' + urls[i].get('href').replace('?kw='+keyword+'&pi=0','')
             publish_date = publish_dates[i].text
             dateFormatter = "%Y-%m-%d %H:%M"
             published_date = datetime.strptime(publish_date, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(keyword)
+            _logger.debug(f'keyword: {keyword} publisher: {publisher} token: {token}')    
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
                                         'id':1,
                                         'name': title,
-                                        'publisher': '風傳媒',
+                                        'publisher': publisher,
                                         'url':url,
                                         'date': published_date - timedelta(hours=8)
                                     })
@@ -335,13 +340,14 @@ class news_crawler(models.Model):
                     break
             else:
                 break
-    async def get_ttv_news(self,s,keyword,token=token): # not Article
+    async def get_ttv_news(self,s,keyword,token=token): 
         url = 'https://news.ttv.com.tw/search/' + urllib.parse.quote_plus(keyword)
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.select('div.title')
         urls = soup.select('ul > li > a.clearfix')
         publishes = soup.select('div.time')
+        publisher = '台視新聞網'
         for i in range(len(urls)):
             url = 'https://news.ttv.com.tw/'+urls[i].get('href')
             title = titles[i+2].text.replace('\u3000',' ') #將全形space取代為半形space
@@ -350,13 +356,13 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(publish, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(keyword)
+            _logger.debug(f'keyword: {keyword} publisher: {publisher} token: {token}')    
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
                                         'id':1,
                                         'name': title,
-                                        'publisher': '台視新聞網',
+                                        'publisher': publisher,
                                         'url':url,
                                         'date': published_date - timedelta(hours=8)})
                     self.env.cr.commit()
@@ -367,13 +373,14 @@ class news_crawler(models.Model):
                     break
             else:
                 break
-    async def get_ftv_news(self,s,keyword,token=token): # not Article
+    async def get_ftv_news(self,s,keyword,token=token): 
         url = 'https://www.ftvnews.com.tw/search/' + urllib.parse.quote_plus(keyword)
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.select('div.title')
         urls = soup.select('ul > li > a.clearfix')
         publishes = soup.select('div.time')
+        publisher = '民視新聞網'
         for i in range(len(urls)):
             url = 'https://www.ftvnews.com.tw'+urls[i].get('href')
             title = titles[i].text.replace('\u3000',' ') #將全形space取代為半形space
@@ -382,13 +389,13 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(publish, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(keyword)
+            _logger.debug(f'keyword: {keyword} publisher: {publisher} token: {token}')    
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
                                         'id':1,
                                         'name': title,
-                                        'publisher': '民視新聞網',
+                                        'publisher': publisher,
                                         'url':url,
                                         'date': published_date - timedelta(hours=8)})
                     self.env.cr.commit()
@@ -399,13 +406,14 @@ class news_crawler(models.Model):
                     break
             else:
                 break
-    async def get_cna_news(self,s,keyword,token=token): # not Article
+    async def get_cna_news(self,s,keyword,token=token): 
         url = 'https://www.cna.com.tw/search/hysearchws.aspx?q=' + urllib.parse.quote_plus(keyword)
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         urls = soup.select('ul.mainList > li > a')
         titles = soup.select('div.listInfo > h2')
         dates = soup.select('div.date')
+        publisher = 'CNA中央社'
         for i in range(len(urls)):
             url = urls[i].get('href')
             title = titles[i].text.replace('\u3000',' ') #將全形space取代為半形space
@@ -414,13 +422,13 @@ class news_crawler(models.Model):
             published_date = datetime.strptime(publish, dateFormatter)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
-            _logger.debug(keyword)
+            _logger.debug(f'keyword: {keyword} publisher: {publisher} token: {token}')    
             if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
                                         'id':1,
                                         'name': title,
-                                        'publisher': 'CNA中央社',
+                                        'publisher': publisher,
                                         'url':url,
                                         'date': published_date - timedelta(hours=8)})
                     self.env.cr.commit()
