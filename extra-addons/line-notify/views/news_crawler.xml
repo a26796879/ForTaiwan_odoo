@@ -7,9 +7,11 @@
       <field name="arch" type="xml">
         <tree default_order='date desc'>
           <field name="name"/>
+          <field name="keyword"/>
           <field name="publisher"/>
           <field name="url" widget="url"/>
           <field name="date"/>
+          <field name="create_date"/>
         </tree>
       </field>
     </record>
@@ -21,9 +23,11 @@
         <form>
           <group>
             <field name="name"/>
+            <field name="keyword"/>
             <field name="publisher"/>
             <field name="url" widget="url"/>
             <field name="date"/>
+            <field name="create_date"/>
           </group>
         </form>
       </field>

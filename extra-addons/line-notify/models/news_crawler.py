@@ -5,7 +5,6 @@ from datetime import datetime,timedelta
 import requests, json, asyncio, time, urllib, newspaper, logging
 from bs4 import BeautifulSoup
 from requests_html import AsyncHTMLSession
-from fake_useragent import UserAgent
 _logger = logging.getLogger(__name__)
 
 class news_crawler(models.Model):
@@ -16,6 +15,7 @@ class news_crawler(models.Model):
     publisher = fields.Char('發布者')
     url = fields.Char('連結')
     date = fields.Datetime('發布時間')
+    keyword = fields.Char('關鍵字')
 
     token = 'here'
     headers = {
@@ -59,7 +59,8 @@ class news_crawler(models.Model):
                                 'name': title,
                                 'publisher':publisher,
                                 'url': url,
-                                'date': published_date
+                                'date': published_date,
+                                'keyword':keyword
                             })
                             self.env.cr.commit()
                             if create_record:
@@ -93,7 +94,8 @@ class news_crawler(models.Model):
                             'name': title,
                             'publisher': publisher,
                             'url': url,
-                            'date': published_date - timedelta(hours=8)
+                            'date': published_date - timedelta(hours=8),
+                            'keyword':keyword
                         })
                         self.env.cr.commit()
                         if create_record:
@@ -123,7 +125,8 @@ class news_crawler(models.Model):
                         'name': title,
                         'publisher': publisher,
                         'url': url,
-                        'date': published_date
+                        'date': published_date,
+                        'keyword':keyword
                     })
                     self.env.cr.commit()
                     if create_record:
@@ -160,7 +163,8 @@ class news_crawler(models.Model):
                                 'name': title,
                                 'publisher': publisher,
                                 'url':url,
-                                'date': published_date - timedelta(hours=8)
+                                'date': published_date - timedelta(hours=8),
+                                'keyword':keyword
                         })
                         self.env.cr.commit()
                         if create_record:
@@ -196,7 +200,8 @@ class news_crawler(models.Model):
                                 'name': title,
                                 'publisher': publisher,
                                 'url':url,
-                                'date': published_date - timedelta(hours=8)
+                                'date': published_date - timedelta(hours=8),
+                                'keyword':keyword
                     })
                     self.env.cr.commit()
                     if create_record:
@@ -229,7 +234,8 @@ class news_crawler(models.Model):
                                 'name': title,
                                 'publisher': publisher,
                                 'url':url,
-                                'date': published_date - timedelta(hours=8)
+                                'date': published_date - timedelta(hours=8),
+                                'keyword':keyword
                     })
                     self.env.cr.commit()
                     if create_record:
@@ -263,7 +269,8 @@ class news_crawler(models.Model):
                                 'name': title,
                                 'publisher': publisher,
                                 'url':url,
-                                'date': published_date - timedelta(hours=8)
+                                'date': published_date - timedelta(hours=8),
+                                'keyword':keyword
                     })
                     self.env.cr.commit()
                     if create_record:
@@ -296,7 +303,8 @@ class news_crawler(models.Model):
                             'name': title,
                             'publisher': publisher,
                             'url':url,
-                            'date': published_date - timedelta(hours=8)
+                            'date': published_date - timedelta(hours=8),
+                            'keyword':keyword
                     })
                     self.env.cr.commit()
                     if create_record:
@@ -330,7 +338,8 @@ class news_crawler(models.Model):
                                         'name': title,
                                         'publisher': publisher,
                                         'url':url,
-                                        'date': published_date - timedelta(hours=8)
+                                        'date': published_date - timedelta(hours=8),
+                                        'keyword':keyword
                                     })
                     self.env.cr.commit()
                     if create_record:
@@ -364,7 +373,9 @@ class news_crawler(models.Model):
                                         'name': title,
                                         'publisher': publisher,
                                         'url':url,
-                                        'date': published_date - timedelta(hours=8)})
+                                        'date': published_date - timedelta(hours=8),
+                                        'keyword':keyword
+                                    })
                     self.env.cr.commit()
                     if create_record:
                         line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
@@ -397,7 +408,9 @@ class news_crawler(models.Model):
                                         'name': title,
                                         'publisher': publisher,
                                         'url':url,
-                                        'date': published_date - timedelta(hours=8)})
+                                        'date': published_date - timedelta(hours=8),
+                                        'keyword':keyword
+                                    })
                     self.env.cr.commit()
                     if create_record:
                         line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
@@ -430,7 +443,9 @@ class news_crawler(models.Model):
                                         'name': title,
                                         'publisher': publisher,
                                         'url':url,
-                                        'date': published_date - timedelta(hours=8)})
+                                        'date': published_date - timedelta(hours=8),
+                                        'keyword':keyword
+                                    })
                     self.env.cr.commit()
                     if create_record:
                         line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
