@@ -1,4 +1,4 @@
-/home/a26796879/odoo-log-data/*.log {
+/var/log/odoo/*.log {
     daily
     dateext
     missingok
