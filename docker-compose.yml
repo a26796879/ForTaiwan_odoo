@@ -11,6 +11,7 @@ services:
       - ./config:/etc/odoo
       - ./extra-addons:/mnt/extra-addons
       - ./odoo-log-data:/var/log/odoo
+      - ./logrotate.d:/etc/logrotate.d
 
   db:
     image: postgres:13

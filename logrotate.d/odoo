@@ -1,0 +1,10 @@
+/var/log/odoo/*.log {
+    daily
+    dateext
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 640 odoo odoo
+}
