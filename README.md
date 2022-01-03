@@ -1,5 +1,14 @@
 # ForTaiwan_odoo
 
+功能：  
+關鍵字新聞推播  
+
+工具：  
+Odoo : 存放新聞資料、設定排程  
+LineNotify : 進行新聞推播  
+Docker : 將系統打包便於部署  
+GCP : 部署環境
+
 使用步驟：
 1. clone 此專案
 2. docker pull a26796879/fortaiwan_odoo:latest  
