@@ -29,7 +29,16 @@ class news_crawler(models.Model):
         payload = {'message': msg}
         r = requests.post(url, headers = headers, params = payload)#, files = files)
         return r.status_code
-
+    def all_keywords(*keywords,type):
+        all_words = ''
+        if type == 'urlencode':
+            for word in keywords[1:]:
+                all_words += urllib.parse.quote(str(word)) + '+'
+            return all_words[0:-1]
+        else:
+            for word in keywords[1:]:
+                all_words += str(word) + '+'
+            return all_words[0:-1]
     def get_google_news(self,keyword,token=token):
         google_news = GNews(language='zh-Hant', country='TW', period='4h')
         news = google_news.get_news(keyword)
@@ -72,8 +81,14 @@ class news_crawler(models.Model):
                         break
             except newspaper.article.ArticleException:
                 continue
-    async def get_udn_news(self,s,keyword,token=token): 
-        udn_url = 'https://udn.com/api/more?page=0&id=search:'+ urllib.parse.quote_plus(keyword) +'&channelId=2&type=searchword'            
+    async def get_udn_news(self,s,*keywords,token=token): 
+        keyword_urlencode = self.all_keywords(*keywords,type='urlencode')
+        keyword = self.all_keywords(*keywords,type='string')
+        _logger.debug(*keywords)
+        _logger.debug('get_udn_news')
+        _logger.debug(keyword_urlencode)
+        _logger.debug(keyword)
+        udn_url = 'https://udn.com/api/more?page=0&id=search:'+ keyword_urlencode +'&channelId=2&type=searchword'            
         res = requests.get(url=udn_url,headers=self.headers)
         news = res.json()['lists']
         publisher = 'UDN聯合新聞網'
@@ -105,8 +120,10 @@ class news_crawler(models.Model):
                         break
                 else:
                     break
-    async def get_apple_news(self,s,keyword,token=token): 
-        apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22'+ urllib.parse.quote_plus(keyword) +'%22%2C%22start%22%3A0%7D&_website=tw-appledaily'
+    async def get_apple_news(self,s,*keywords,token=token): 
+        keyword_urlencode = self.all_keywords(*keywords,type='urlencode')
+        keyword = self.all_keywords(*keywords,type='string')
+        apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22'+ keyword_urlencode +'%22%2C%22start%22%3A0%7D&_website=tw-appledaily'
         res = requests.get(url=apple_url,headers=self.headers)
         news = res.json()['content']
         for i in range(len(news)):
@@ -136,8 +153,10 @@ class news_crawler(models.Model):
                     break
             else:
                 break
-    async def get_ltn_news(self,s,keyword,token=token):
-        url = 'https://search.ltn.com.tw/list?keyword=' + urllib.parse.quote_plus(keyword)
+    async def get_ltn_news(self,s,*keywords,token=token):
+        keyword_urlencode = self.all_keywords(*keywords,type='urlencode')
+        keyword = self.all_keywords(*keywords,type='string')
+        url = 'https://search.ltn.com.tw/list?keyword=' + keyword_urlencode
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.find_all("a", class_="tit")
@@ -176,8 +195,10 @@ class news_crawler(models.Model):
                     break
             except requests.exceptions.RequestException as e:  # This is the correct syntax:
                 continue
-    async def get_setn_news(self,s,keyword,token=token):
-        url = 'https://www.setn.com/search.aspx?q='+ urllib.parse.quote_plus(keyword) +'&r=0'
+    async def get_setn_news(self,s,*keywords,token=token):
+        keyword_urlencode = self.all_keywords(*keywords,type='urlencode')
+        keyword = self.all_keywords(*keywords,type='string')
+        url = 'https://www.setn.com/search.aspx?q='+ keyword_urlencode +'&r=0'
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.select('div.newsimg-area-text-2')
@@ -211,8 +232,10 @@ class news_crawler(models.Model):
                     break
             else:
                 break
-    async def get_ettoday_news(self,s,keyword,token=token): 
-        url = 'https://www.ettoday.net/news_search/doSearch.php?search_term_string='+ urllib.parse.quote_plus(keyword)
+    async def get_ettoday_news(self,s,*keywords,token=token): 
+        keyword_urlencode = self.all_keywords(*keywords,type='urlencode')
+        keyword = self.all_keywords(*keywords,type='string')
+        url = 'https://www.ettoday.net/news_search/doSearch.php?search_term_string='+ keyword_urlencode
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.select('h2 > a')
@@ -245,8 +268,10 @@ class news_crawler(models.Model):
                     break
             else:
                 break
-    async def get_TVBS_news(self,s,keyword,token=token): 
-        url = 'https://news.tvbs.com.tw/news/searchresult/'+ urllib.parse.quote_plus(keyword) +'/news'
+    async def get_TVBS_news(self,s,*keywords,token=token): 
+        keyword_urlencode = self.all_keywords(*keywords,type='urlencode')
+        keyword = self.all_keywords(*keywords,type='string')
+        url = 'https://news.tvbs.com.tw/news/searchresult/'+ keyword_urlencode +'/news'
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.select('h2.search_list_txt')
@@ -280,8 +305,10 @@ class news_crawler(models.Model):
                     break
             else:
                 break
-    async def get_china_news(self,s,keyword,token=token):
-        url = 'https://www.chinatimes.com/search/'+ urllib.parse.quote_plus(keyword) +'?chdtv'
+    async def get_china_news(self,s,*keywords,token=token):
+        keyword_urlencode = self.all_keywords(*keywords,type='urlencode')
+        keyword = self.all_keywords(*keywords,type='string')
+        url = 'https://www.chinatimes.com/search/'+ keyword_urlencode +'?chdtv'
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.select('h3 > a')
@@ -314,8 +341,10 @@ class news_crawler(models.Model):
                     break
             else:
                 break
-    async def get_storm_news(self,s,keyword,token=token): 
-        url = 'https://www.storm.mg/site-search/result?q='+ urllib.parse.quote_plus(keyword) +'&order=none&format=week'
+    async def get_storm_news(self,s,*keywords,token=token): 
+        keyword_urlencode = self.all_keywords(*keywords,type='urlencode')
+        keyword = self.all_keywords(*keywords,type='string')
+        url = 'https://www.storm.mg/site-search/result?q='+ keyword_urlencode +'&order=none&format=week'
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.select('p.card_title')
@@ -349,8 +378,10 @@ class news_crawler(models.Model):
                     break
             else:
                 break
-    async def get_ttv_news(self,s,keyword,token=token): 
-        url = 'https://news.ttv.com.tw/search/' + urllib.parse.quote_plus(keyword)
+    async def get_ttv_news(self,s,*keywords,token=token): 
+        keyword_urlencode = self.all_keywords(*keywords,type='urlencode')
+        keyword = self.all_keywords(*keywords,type='string')
+        url = 'https://news.ttv.com.tw/search/' + keyword_urlencode
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.select('div.title')
@@ -384,8 +415,10 @@ class news_crawler(models.Model):
                     break
             else:
                 break
-    async def get_ftv_news(self,s,keyword,token=token): 
-        url = 'https://www.ftvnews.com.tw/search/' + urllib.parse.quote_plus(keyword)
+    async def get_ftv_news(self,s,*keywords,token=token): 
+        keyword_urlencode = self.all_keywords(*keywords,type='urlencode')
+        keyword = self.all_keywords(*keywords,type='string')
+        url = 'https://www.ftvnews.com.tw/search/' + keyword_urlencode
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.select('div.title')
@@ -419,8 +452,10 @@ class news_crawler(models.Model):
                     break
             else:
                 break
-    async def get_cna_news(self,s,keyword,token=token): 
-        url = 'https://www.cna.com.tw/search/hysearchws.aspx?q=' + urllib.parse.quote_plus(keyword)
+    async def get_cna_news(self,s,*keywords,token=token): 
+        keyword_urlencode = self.all_keywords(*keywords,type='urlencode')
+        keyword = self.all_keywords(*keywords,type='string')
+        url = 'https://www.cna.com.tw/search/hysearchws.aspx?q=' + keyword_urlencode
         res = requests.get(url=url,headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         urls = soup.select('ul.mainList > li > a')
@@ -454,19 +489,19 @@ class news_crawler(models.Model):
                     break
             else:
                 break
-    async def main(self,keyword,token=token):
+    async def main(self,*keywords,token=token):
         s = AsyncHTMLSession()
-        udn_task = self.get_udn_news(s,keyword,token=token)
-        apple_task = self.get_apple_news(s,keyword,token=token)
-        setn_task = self.get_setn_news(s,keyword,token=token)
-        ettoday_task = self.get_ettoday_news(s,keyword,token=token)
-        tvbs_task = self.get_TVBS_news(s,keyword,token=token)
-        china_task = self.get_china_news(s,keyword,token=token)
-        storm_task = self.get_storm_news(s,keyword,token=token)
-        ttv_task = self.get_ttv_news(s,keyword,token=token)
-        ftv_task = self.get_ftv_news(s,keyword,token=token)
-        ltn_task = self.get_ltn_news(s,keyword,token=token)
-        cna_task = self.get_cna_news(s,keyword,token=token)
+        udn_task = self.get_udn_news(s,*keywords,token=token)
+        apple_task = self.get_apple_news(s,*keywords,token=token)
+        setn_task = self.get_setn_news(s,*keywords,token=token)
+        ettoday_task = self.get_ettoday_news(s,*keywords,token=token)
+        tvbs_task = self.get_TVBS_news(s,*keywords,token=token)
+        china_task = self.get_china_news(s,*keywords,token=token)
+        storm_task = self.get_storm_news(s,*keywords,token=token)
+        ttv_task = self.get_ttv_news(s,*keywords,token=token)
+        ftv_task = self.get_ftv_news(s,*keywords,token=token)
+        ltn_task = self.get_ltn_news(s,*keywords,token=token)
+        cna_task = self.get_cna_news(s,*keywords,token=token)
         return await asyncio.gather(udn_task,apple_task,setn_task,ettoday_task,tvbs_task,china_task,storm_task,ttv_task,ftv_task,ltn_task,cna_task)
-    def run_main(self,keyword,token=token):
-        asyncio.run(self.main(keyword,token=token))
+    def run_main(self,*keywords,token=token):
+        asyncio.run(self.main(*keywords,token=token))
