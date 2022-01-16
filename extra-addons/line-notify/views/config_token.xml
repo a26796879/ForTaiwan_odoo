@@ -2,27 +2,27 @@
     <data>
         <!-- explicit list view definition -->
         <record model="ir.ui.view" id="line-notify.config_token_list">
-        <field name="name">config_token_list</field>
-        <field name="model">config_token</field>
-        <field name="arch" type="xml">
-            <tree>
-            <field name="env_name"/>
-            <field name="line_token"/>
-            </tree>
-        </field>
+            <field name="name">config_token_list</field>
+            <field name="model">config_token</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="env_name"/>
+                    <field name="line_token"/>
+                </tree>
+            </field>
         </record>
 
         <record model="ir.ui.view" id="line-notify.config_token_form">
-        <field name="name">config_token_form</field>
-        <field name="model">config_token</field>
-        <field name="arch" type="xml">
-            <form>
-                <group>
-                    <field name="env_name"/>
-                    <field name="line_token"/>
-                </group>
-            </form>
-        </field>
+            <field name="name">config_token_form</field>
+            <field name="model">config_token</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="env_name"/>
+                        <field name="line_token"/>
+                    </group>
+                </form>
+            </field>
         </record>
     </data>
 </odoo>
