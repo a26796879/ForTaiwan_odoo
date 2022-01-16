@@ -33,11 +33,11 @@ class news_crawler(models.Model):
         all_words = ''
         if type == 'urlencode':
             for word in keywords[1:]:
-                all_words += urllib.parse.quote(str(word)) + '+'
-            return all_words[0:-1]
+                all_words += urllib.parse.quote(str(word)) + '%20'
+            return all_words[0:-3]
         else:
             for word in keywords[1:]:
-                all_words += str(word) + '+'
+                all_words += str(word) + '&'
             return all_words[0:-1]
     def get_google_news(self,keyword,token=token):
         google_news = GNews(language='zh-Hant', country='TW', period='4h')
