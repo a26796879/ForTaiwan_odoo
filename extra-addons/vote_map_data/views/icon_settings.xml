@@ -1,0 +1,33 @@
+<odoo>
+    <data>
+        <!-- explicit list view definition -->
+        <record model="ir.ui.view" id="vote_map_data.icon_settings_list">
+        <field name="name">icon_settings_list</field>
+        <field name="model">icon_settings</field>
+        <field name="arch" type="xml">
+            <tree>
+                <button name="test_button"/>
+                <field name="name"/>
+                <field name="local_x"/>
+                <field name="local_y"/>
+                <field name="icon_url"/>
+            </tree>
+        </field>
+        </record>
+
+        <record model="ir.ui.view" id="vote_map_data.icon_settings_form">
+        <field name="name">icon_settings_form</field>
+        <field name="model">icon_settings</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="name"/>
+                    <field name="local_x"/>
+                    <field name="local_y"/>
+                    <field name="icon_url"/>
+                </group>
+            </form>
+        </field>
+        </record>
+    </data>
+</odoo>
