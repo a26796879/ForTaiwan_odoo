@@ -6,8 +6,7 @@ class icon_settings(models.Model):
     _description = '選舉地圖 座標設定'
 
     name = fields.Char('名稱')
-    local_x = fields.Char('座標x')
-    local_y = fields.Char('座標y')
+    local_xy = fields.Char('座標x,y')
     icon_url = fields.Char('icon_url設定')
 
 '''
