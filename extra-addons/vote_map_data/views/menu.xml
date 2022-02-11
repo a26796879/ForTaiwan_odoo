@@ -1,0 +1,11 @@
+<odoo>
+    <record id="icon_settings_action" model="ir.actions.act_window">
+      <field name="name">icon_settings</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">icon_settings</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem name="選舉地圖設定" id="vote_map_data.menu_root"/>
+    <menuitem id="menu_icon_settings_view" name="icon_settings" parent="vote_map_data.menu_root" action="icon_settings_action" sequence="1"/>
+</odoo>

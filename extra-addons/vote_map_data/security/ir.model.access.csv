@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+access_icon_settings,icon_settings,model_icon_settings,group_User,1,0,0,0
+access_icon_settings,icon_settings,model_icon_settings,group_Admin,1,1,1,1
