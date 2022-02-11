@@ -8,11 +8,11 @@ class Icon_Settings(http.Controller):
     @http.route('/objects', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
     def index(self):
         dataset = http.request.env['icon_settings'].sudo().search([])
-        result = {}
+        result = []
         for data in dataset:
             _logger.debug(data.name)
-            result[data.name] = [[data.local_xy],data.icon_url]
-        results = json.dumps(result)
+            result.append({'name':data.name,'local':[data.local_xy],'icon_url':data.icon_url})
+        results = json.dumps({'data':result})
         return results
 
 #     @http.route('/line-notify/line-notify/objects/', auth='public')
