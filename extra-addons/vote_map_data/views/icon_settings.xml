@@ -6,10 +6,8 @@
         <field name="model">icon_settings</field>
         <field name="arch" type="xml">
             <tree>
-                <button name="test_button"/>
                 <field name="name"/>
-                <field name="local_x"/>
-                <field name="local_y"/>
+                <field name="local_xy"/>
                 <field name="icon_url"/>
             </tree>
         </field>
@@ -22,8 +20,7 @@
             <form>
                 <group>
                     <field name="name"/>
-                    <field name="local_x"/>
-                    <field name="local_y"/>
+                    <field name="local_xy"/>
                     <field name="icon_url"/>
                 </group>
             </form>
