@@ -1,14 +1,19 @@
 # -*- coding: utf-8 -*-
-from odoo import http,logging
+from odoo import http
+import json, logging
 
 _logger = logging.getLogger(__name__)
 
 class Icon_Settings(http.Controller):
     @http.route('/objects', type="http", auth="public", methods=["GET"], csrf=False)
     def index(self):
-        result = http.request.env['vote_map_data.icon_settings'].search([])
-        _logger.debug(result)
-        return 'test'
+        dataset = http.request.env['icon_settings'].sudo().search([])
+        result = {}
+        for data in dataset:
+            _logger.debug(data.name)
+            result[data.name] = [[data.local_xy],data.icon_url]
+        results = json.dumps(result)
+        return results
 
 #     @http.route('/line-notify/line-notify/objects/', auth='public')
 #     def list(self, **kw):
