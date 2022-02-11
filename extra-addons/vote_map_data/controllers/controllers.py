@@ -5,7 +5,7 @@ import json, logging
 _logger = logging.getLogger(__name__)
 
 class Icon_Settings(http.Controller):
-    @http.route('/objects', type="http", auth="public", methods=["GET"], csrf=False)
+    @http.route('/objects', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
     def index(self):
         dataset = http.request.env['icon_settings'].sudo().search([])
         result = {}
