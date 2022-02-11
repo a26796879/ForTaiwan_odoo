@@ -7,7 +7,8 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name"/>
-                <field name="local_xy"/>
+                <field name="local_x"/>
+                <field name="local_y"/>
                 <field name="icon_url"/>
             </tree>
         </field>
@@ -20,7 +21,8 @@
             <form>
                 <group>
                     <field name="name"/>
-                    <field name="local_xy"/>
+                    <field name="local_x"/>
+                    <field name="local_y"/>
                     <field name="icon_url"/>
                 </group>
             </form>
