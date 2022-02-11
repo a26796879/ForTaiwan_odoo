@@ -11,7 +11,7 @@ class Icon_Settings(http.Controller):
         result = []
         for data in dataset:
             _logger.debug(data.name)
-            result.append({'name':data.name,'local':[data.local_xy],'icon_url':data.icon_url})
+            result.append({'name':data.name,'local':[data.local_x,data.local_y],'icon_url':data.icon_url})
         results = json.dumps({'data':result})
         return results
 
