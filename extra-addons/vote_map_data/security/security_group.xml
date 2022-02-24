@@ -1,8 +1,8 @@
 <odoo>
     <data>
         <record model="ir.module.category" id="module_management">
-             <field name="name">line-notify</field>
-             <field name="description">User access right for line-notify module</field>
+             <field name="name">vote_map_data</field>
+             <field name="description">User access right for vote_map_data module</field>
         </record>
 
         <record model="res.groups" id="group_User">
