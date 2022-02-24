@@ -6,7 +6,7 @@
             <field name="model">vote_data</field>
             <field name="arch" type="xml">
                 <tree>
-                    <field name="type"/>
+                    <field name="vote_type"/>
                     <field name="city"/>
                     <field name="district"/>
                     <field name="data"/>
@@ -20,7 +20,7 @@
             <field name="arch" type="xml">
                 <form>
                     <group>
-                        <field name="type"/>
+                        <field name="vote_type"/>
                         <field name="city"/>
                         <field name="district"/>
                         <field name="data"/>
