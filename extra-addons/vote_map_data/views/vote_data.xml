@@ -1,0 +1,32 @@
+<odoo>
+    <data>
+        <!-- explicit list view definition -->
+        <record model="ir.ui.view" id="vote_map_data.vote_data_list">
+            <field name="name">vote_data_list</field>
+            <field name="model">vote_data</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="type"/>
+                    <field name="city"/>
+                    <field name="district"/>
+                    <field name="data"/>
+                </tree>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="vote_map_data.vote_data_form">
+            <field name="name">vote_data_form</field>
+            <field name="model">vote_data</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="type"/>
+                        <field name="city"/>
+                        <field name="district"/>
+                        <field name="data"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -6,6 +6,22 @@
       <field name="view_mode">tree,form</field>
     </record>
 
-    <menuitem name="選舉地圖設定" id="vote_map_data.menu_root"/>
+    <record id="map_data_action" model="ir.actions.act_window">
+      <field name="name">map_data</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">map_data</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <record id="vote_data_action" model="ir.actions.act_window">
+      <field name="name">vote_data</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">vote_data</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <menuitem name="選舉圖資設定" id="vote_map_data.menu_root"/>
     <menuitem id="menu_icon_settings_view" name="icon_settings" parent="vote_map_data.menu_root" action="icon_settings_action" sequence="1"/>
+    <menuitem id="menu_map_data_view" name="map_data" parent="vote_map_data.menu_root" action="map_data_action" sequence="2"/>
+    <menuitem id="menu_vote_data_view" name="vote_data" parent="vote_map_data.menu_root" action="vote_data_action" sequence="3"/>
 </odoo>
