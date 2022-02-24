@@ -2,3 +2,7 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 
 access_icon_settings,icon_settings,model_icon_settings,group_User,1,0,0,0
 access_icon_settings,icon_settings,model_icon_settings,group_Admin,1,1,1,1
+access_map_data,map_data,model_map_data,group_User,1,0,0,0
+access_map_data,map_data,model_map_data,group_Admin,1,1,1,1
+access_vote_data,vote_data,model_vote_data,group_User,1,0,0,0
+access_vote_data,vote_data,model_vote_data,group_Admin,1,1,1,1
