@@ -27,6 +27,8 @@
         'security/security_group.xml',
         'security/ir.model.access.csv',
         'views/icon_settings.xml',
+        'views/map_data.xml',
+        'views/vote_data.xml',
         'views/menu.xml',
     ],
     # only loaded in demonstration mode
