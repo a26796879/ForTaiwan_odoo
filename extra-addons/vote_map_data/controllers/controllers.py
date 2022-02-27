@@ -14,16 +14,16 @@ class Icon_Settings(http.Controller):
         results = json.dumps({'data':result})
         return results
 
-    @http.route('/vote_data', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
-    def vote_data(self):
-        dataset = http.request.env['vote_data'].sudo().search([('city','=','高雄市'),('district','=','三民區')])
+    @http.route('/vote_data/<string:vote_type>/<string:city>/<string:district>', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
+    def vote_data(self,vote_type,city,district):
+        dataset = http.request.env['vote_data'].sudo().search([('vote_type','=',vote_type),('city','=',city),('district','=',district)])
         str_results = json.dumps(dataset.data)
         results = json.loads(str_results)
         return results
 
-    @http.route('/map_data', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
-    def map_data(self):
-        dataset = http.request.env['map_data'].sudo().search([('city','=','高雄市'),('district','=','三民區')])
+    @http.route('/map_data/<string:city>/<string:district>', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
+    def map_data(self,city,district):
+        dataset = http.request.env['map_data'].sudo().search([('city','=',city),('district','=',district)])
         str_results = json.dumps(dataset.data)
         results = json.loads(str_results)
         return results
