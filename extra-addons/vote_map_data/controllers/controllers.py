@@ -14,9 +14,30 @@ class Icon_Settings(http.Controller):
         results = json.dumps({'data':result})
         return results
 
+    @http.route('/vote_data/<string:vote_type>', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
+    def vote_data(self,vote_type):
+        dataset = http.request.env['vote_data'].sudo().search([('vote_type','=',vote_type)])
+        str_results = json.dumps(dataset.data)
+        results = json.loads(str_results)
+        return results
+
+    @http.route('/vote_data/<string:vote_type>/<string:city>', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
+    def vote_data(self,vote_type,city):
+        dataset = http.request.env['vote_data'].sudo().search([('vote_type','=',vote_type),('city','=',city)])
+        str_results = json.dumps(dataset.data)
+        results = json.loads(str_results)
+        return results
+
     @http.route('/vote_data/<string:vote_type>/<string:city>/<string:district>', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
     def vote_data(self,vote_type,city,district):
         dataset = http.request.env['vote_data'].sudo().search([('vote_type','=',vote_type),('city','=',city),('district','=',district)])
+        str_results = json.dumps(dataset.data)
+        results = json.loads(str_results)
+        return results
+
+    @http.route('/map_data/<string:city>', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
+    def map_data(self,city):
+        dataset = http.request.env['map_data'].sudo().search([('city','=',city)])
         str_results = json.dumps(dataset.data)
         results = json.loads(str_results)
         return results
