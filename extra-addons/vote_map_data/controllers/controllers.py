@@ -28,21 +28,28 @@ class Icon_Settings(http.Controller):
     @http.route('/vote_data/<string:vote_type>/<string:city>', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
     def vote_data_city(self,vote_type,city):
         dataset = http.request.env['vote_data'].sudo().search([('vote_type','=',vote_type),('city','=',city)])
-        districts = []
+        vote_places = []
         for i in dataset:
-            districts.append(i.district)
-            _logger.debug(i.district)
-        results = json.dumps({'data':districts})
+            vote_places.append(i.vote_place)
+            _logger.debug(i.vote_place)
+        results = json.dumps({'data':vote_places})
         _logger.debug(results)
         return results
 
+    @http.route('/vote_data/<string:vote_type>/<string:city>/<string:place>', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
+    def vote_data_place(self,vote_type,city,place):
+        dataset = http.request.env['vote_data'].sudo().search([('vote_type','=',vote_type),('city','=',city),('place','=',place)])
+        str_results = json.dumps(dataset.data)
+        results = json.loads(str_results)
+        return results
+    #
     @http.route('/vote_data/<string:vote_type>/<string:city>/<string:district>', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
     def vote_data_district(self,vote_type,city,district):
         dataset = http.request.env['vote_data'].sudo().search([('vote_type','=',vote_type),('city','=',city),('district','=',district)])
         str_results = json.dumps(dataset.data)
         results = json.loads(str_results)
         return results
-
+    #
     @http.route('/map_data/<string:city>', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
     def map_data_city(self,city):
         districts = []

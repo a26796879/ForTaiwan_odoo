@@ -30,9 +30,5 @@
         'views/map_data.xml',
         'views/vote_data.xml',
         'views/menu.xml',
-    ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
-    ],
+    ]
 }
