@@ -6,5 +6,6 @@ class vote_data(models.Model):
 
     vote_type = fields.Char('選舉類別')
     city = fields.Char('縣市別')
-    district = fields.Char('行政區別')
+    place = fields.Char('選區別')
+    district = fields.Char('行政區')
     data = fields.Char('得票資訊')

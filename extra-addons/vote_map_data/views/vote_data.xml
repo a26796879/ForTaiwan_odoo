@@ -8,6 +8,7 @@
                 <tree>
                     <field name="vote_type"/>
                     <field name="city"/>
+                    <field name="place"/>
                     <field name="district"/>
                     <field name="data"/>
                 </tree>
@@ -22,6 +23,7 @@
                     <group>
                         <field name="vote_type"/>
                         <field name="city"/>
+                        <field name="place"/>
                         <field name="district"/>
                         <field name="data"/>
                     </group>
