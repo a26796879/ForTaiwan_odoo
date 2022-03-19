@@ -32,17 +32,17 @@ class Icon_Settings(http.Controller):
         return results
 
     @http.route('/vote_data/<string:vote_type>/<string:city>/<string:place>', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
-    def vote_data_place(self,vote_type,city,place):
+    def vote_data_get_place(self,vote_type,city,place):
         dataset = http.request.env['vote_data'].sudo().search([('vote_type','=',vote_type),('city','=',city),('place','=',place)])
         districts = []
         for i in dataset:
             districts.append(i.district)
         results = json.dumps({'data':districts})
-        return 'results'
+        return results
     #
-    @http.route('/vote_data/<string:vote_type>/<string:city>/<string:district>', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
-    def vote_data_district(self,vote_type,city,district):
-        dataset = http.request.env['vote_data'].sudo().search([('vote_type','=',vote_type),('city','=',city),('district','=',district)])
+    @http.route('/vote_data/<string:vote_type>/<string:city>/<string:place>/<string:district>', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
+    def vote_data_district(self,vote_type,city,place,district):
+        dataset = http.request.env['vote_data'].sudo().search([('vote_type','=',vote_type),('city','=',city),('place','=',place),('district','=',district)])
         str_results = json.dumps(dataset.data)
         results = json.loads(str_results)
         return results
