@@ -39,10 +39,10 @@ class Icon_Settings(http.Controller):
             districts.append(i.district)
         results = json.dumps({'data':districts})
         return results
-    #
+
     @http.route('/vote_data/<string:vote_type>/<string:city>/<string:place>/<string:district>', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
-    def vote_data_district(self,vote_type,city,place,district):
-        dataset = http.request.env['vote_data'].sudo().search([('vote_type','=',vote_type),('city','=',city),('place','=',place),('district','=',district)])
+    def vote_data_get_district(self,vote_type,city,place,district):
+        dataset = http.request.env['vote_data'].sudo().search([('vote_type','=',vote_type),('city','=',city),('place','=',place),('district','like',district)])
         str_results = json.dumps(dataset.data)
         results = json.loads(str_results)
         return results
