@@ -169,9 +169,9 @@ class news_crawler(models.Model):
             try:
                 res = requests.get(url=url,headers=self.headers, timeout = 10)
                 soup = BeautifulSoup(res.text, 'html.parser')
-                publish = soup.select('span.time')[0].text.replace('\n    ','')
+                publish = soup.select('span.time')[0].text.replace('\n    ','').replace('\r','')
                 if publish == "":
-                    publish = soup.select('span.time')[1].text.replace('\n    ','')
+                    publish = soup.select('span.time')[1].text.replace('\n    ','').replace('\r','')
                 if len(self.search([("url","=",url)])) == 0  and len(self.search([("name","=",title)])) == 0:
                     dateFormatter = "%Y/%m/%d %H:%M"
                     published_date = datetime.strptime(publish, dateFormatter)
