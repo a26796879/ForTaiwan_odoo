@@ -1,7 +1,8 @@
 # ForTaiwan_odoo
 
 功能：  
-關鍵字新聞推播  
+1. 關鍵字新聞推播  
+2. 建立OpenStreetMap以及選舉資料所需欄位＆Data  
 
 工具：  
 Odoo : MVC架構的Web Service，使用ORM操作DB  
