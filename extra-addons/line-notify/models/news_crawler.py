@@ -65,9 +65,9 @@ class news_crawler(models.Model):
             url = news[i]['url'].replace(
                 'https://m.ltn', 'https://news.ltn')  # 如果有m版網址，將其取代
             publisher = news[i]['publisher']['title']
-            dateString = news[i]['published date']
+            date_string = news[i]['published date']
             date_format = "%a, %d %b %Y %H:%M:%S GMT"
-            published_date = datetime.strptime(dateString, date_format)
+            published_date = datetime.strptime(date_string, date_format)
             expect_time = datetime.today() - timedelta(hours=1)
             article = Article(url, config=config)
             try:
@@ -101,7 +101,7 @@ class news_crawler(models.Model):
             except newspaper.article.ArticleException:
                 continue
 
-    async def get_udn_news(self, s, *keywords, token=token):
+    async def get_udn_news(self, async_session, *keywords, token=token):
         keyword_urlencode = self.all_keywords(*keywords, type='urlencode')
         keyword = self.all_keywords(*keywords, type='string')
         _logger.debug(*keywords)
@@ -113,13 +113,13 @@ class news_crawler(models.Model):
         res = requests.get(url=udn_url, headers=self.headers)
         news = res.json()['lists']
         publisher = 'UDN聯合新聞網'
-        for i in range(len(news)):
+        for i, v in enumerate(news):
             url = news[i]['titleLink']
             title = news[i]['title'].replace(
                 '\u3000', ' ')  # 將全形space取代為半形space
-            dateString = news[i]['time']['date']
+            date_string = news[i]['time']['date']
             date_format = "%Y-%m-%d %H:%M:%S"
-            published_date = datetime.strptime(dateString, date_format)
+            published_date = datetime.strptime(date_string, date_format)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(
@@ -147,25 +147,22 @@ class news_crawler(models.Model):
                 else:
                     break
 
-    async def get_apple_news(self, s, *keywords, token=token):
+    async def get_apple_news(self, async_session, *keywords, token=token):
         keyword_urlencode = self.all_keywords(*keywords, type='urlencode')
         keyword = self.all_keywords(*keywords, type='string')
-        _logger.debug('get_apple_news')
-        _logger.debug(keyword_urlencode)
         apple_url = 'https://tw.appledaily.com/search/' + keyword_urlencode
         res = requests.get(url=apple_url, headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
         publish = soup.select('div.timestamp')
-        _logger.debug(publish)
-        for i in range(len(publish)):
+        for i, v in enumerate(publish):
             title = soup.select('span.headline')[i].text
-            dateString = soup.select('div.timestamp')[i].text
+            date_string = soup.select('div.timestamp')[i].text
             date_format = "出版時間：%Y/%m/%d %H:%M"
-            published_date = datetime.strptime(dateString, date_format)
+            published_date = datetime.strptime(date_string, date_format)
             publisher = '蘋果新聞網'
             url = 'https://tw.appledaily.com/' + \
                 soup.select('a.story-card')[i].get('href')
-            expect_time = datetime.today() - timedelta(hours=1)
+            expect_time = datetime.today() - timedelta(hours=8)
             _logger.debug('===================================')
             _logger.debug(
                 f'keyword: {keyword} publisher: {publisher} token: {token}')
@@ -176,7 +173,7 @@ class news_crawler(models.Model):
                         'name': title,
                         'publisher': publisher,
                         'url': url,
-                        'date': published_date,
+                        'date': published_date - timedelta(hours=8),
                         'keyword': keyword
                     })
                     self.env.cr.commit()
@@ -191,7 +188,7 @@ class news_crawler(models.Model):
             else:
                 break
 
-    async def get_ltn_news(self, s, *keywords, token=token):
+    async def get_ltn_news(self, async_session, *keywords, token=token):
         keyword_urlencode = self.all_keywords(*keywords, type='urlencode')
         keyword = self.all_keywords(*keywords, type='string')
         url = 'https://search.ltn.com.tw/list?keyword=' + keyword_urlencode
@@ -199,7 +196,7 @@ class news_crawler(models.Model):
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.find_all("a", class_="tit")
         publisher = '自由時報電子報'
-        for i in range(len(titles)):
+        for i, v in enumerate(titles):
             title = titles[i]['title'].replace(
                 '\u3000', ' ')  # 將全形space取代為半形space
             url = titles[i]['href']
@@ -241,7 +238,7 @@ class news_crawler(models.Model):
             except requests.exceptions.RequestException as e:  # This is the correct syntax:
                 continue
 
-    async def get_setn_news(self, s, *keywords, token=token):
+    async def get_setn_news(self, async_session, *keywords, token=token):
         keyword_urlencode = self.all_keywords(*keywords, type='urlencode')
         keyword = self.all_keywords(*keywords, type='string')
         url = 'https://www.setn.com/search.aspx?q=' + keyword_urlencode + '&r=0'
@@ -251,13 +248,13 @@ class news_crawler(models.Model):
         url_tag = soup.select("div.newsimg-area-info >  a.gt ")
         dates = soup.select('div.newsimg-date')
         publisher = '三立新聞網'
-        for i in range(len(titles)):
+        for i, v in enumerate(titles):
             title = titles[i].text.replace('\u3000', ' ')  # 將全形space取代為半形space
-            dateString = dates[i].text
+            date_string = dates[i].text
             url = 'https://www.setn.com/' + \
                 url_tag[i].get('href').replace('&From=Search', '')
             date_format = "%Y/%m/%d %H:%M"
-            published_date = datetime.strptime(dateString, date_format)
+            published_date = datetime.strptime(date_string, date_format)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(
@@ -284,7 +281,7 @@ class news_crawler(models.Model):
             else:
                 break
 
-    async def get_ettoday_news(self, s, *keywords, token=token):
+    async def get_ettoday_news(self, async_session, *keywords, token=token):
         keyword_urlencode = self.all_keywords(*keywords, type='urlencode')
         keyword = self.all_keywords(*keywords, type='string')
         url = 'https://www.ettoday.net/news_search/doSearch.php?search_term_string=' + \
@@ -294,7 +291,7 @@ class news_crawler(models.Model):
         titles = soup.select('h2 > a')
         date = soup.select('span.date')
         publisher = 'ETtoday新聞雲'
-        for i in range(len(titles)):
+        for i, v in enumerate(titles):
             title = titles[i].text.replace('\u3000', ' ')  # 將全形space取代為半形space
             url = titles[i].get('href')
             publish = date[i].text.split('/')[1].replace(' ', '')
@@ -326,7 +323,7 @@ class news_crawler(models.Model):
             else:
                 break
 
-    async def get_TVBS_news(self, s, *keywords, token=token):
+    async def get_tvbs_news(self, async_session, *keywords, token=token):
         keyword_urlencode = self.all_keywords(*keywords, type='urlencode')
         keyword = self.all_keywords(*keywords, type='string')
         url = 'https://news.tvbs.com.tw/news/searchresult/' + keyword_urlencode + '/news'
@@ -334,7 +331,7 @@ class news_crawler(models.Model):
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.select('h2')
         publisher = 'TVBS新聞網'
-        for i in range(len(titles)):
+        for i, v in enumerate(titles):
             title = titles[i].text.replace('\u3000', ' ')  # 將全形space取代為半形space
             each_url = titles[i].find_parents("a")[0].get('href')
             res = requests.get(url=each_url, headers=self.headers)
@@ -370,7 +367,7 @@ class news_crawler(models.Model):
             else:
                 break
 
-    async def get_china_news(self, s, *keywords, token=token):
+    async def get_china_news(self, async_session, *keywords, token=token):
         keyword_urlencode = self.all_keywords(*keywords, type='urlencode')
         keyword = self.all_keywords(*keywords, type='string')
         url = 'https://www.chinatimes.com/search/' + keyword_urlencode + '?chdtv'
@@ -382,9 +379,9 @@ class news_crawler(models.Model):
         for i in range(len(titles)):
             title = titles[i].text.replace('\u3000', ' ')  # 將全形space取代為半形space
             url = titles[i].get('href')
-            dateString = dates[i].get('datetime')
+            date_string = dates[i].get('datetime')
             date_format = "%Y-%m-%d %H:%M"
-            published_date = datetime.strptime(dateString, date_format)
+            published_date = datetime.strptime(date_string, date_format)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(
@@ -411,7 +408,7 @@ class news_crawler(models.Model):
             else:
                 break
 
-    async def get_storm_news(self, s, *keywords, token=token):
+    async def get_storm_news(self, async_session, *keywords, token=token):
         keyword_urlencode = self.all_keywords(*keywords, type='urlencode')
         keyword = self.all_keywords(*keywords, type='string')
         url = 'https://www.storm.mg/site-search/result?q=' + \
@@ -422,7 +419,7 @@ class news_crawler(models.Model):
         urls = soup.select('a.card_substance')
         publish_dates = soup.select('span.info_time')
         publisher = '風傳媒'
-        for i in range(len(titles)):
+        for i, v in enumerate(titles):
             title = titles[i].text.replace('\u3000', ' ')  # 將全形space取代為半形space
             url = 'https://www.storm.mg' + \
                 urls[i].get('href').replace('?kw='+keyword+'&pi=0', '')
@@ -455,7 +452,7 @@ class news_crawler(models.Model):
             else:
                 break
 
-    async def get_ttv_news(self, s, *keywords, token=token):
+    async def get_ttv_news(self, async_session, *keywords, token=token):
         keyword_urlencode = self.all_keywords(*keywords, type='urlencode')
         keyword = self.all_keywords(*keywords, type='string')
         url = 'https://news.ttv.com.tw/search/' + keyword_urlencode
@@ -465,7 +462,7 @@ class news_crawler(models.Model):
         urls = soup.select('ul > li > a.clearfix')
         publishes = soup.select('div.time')
         publisher = '台視新聞網'
-        for i in range(len(urls)):
+        for i, v in enumerate(urls):
             url = 'https://news.ttv.com.tw/'+urls[i].get('href')
             # 將全形space取代為半形space
             title = titles[i+2].text.replace('\u3000', ' ')
@@ -498,7 +495,7 @@ class news_crawler(models.Model):
             else:
                 break
 
-    async def get_ftv_news(self, s, *keywords, token=token):
+    async def get_ftv_news(self, async_session, *keywords, token=token):
         keyword_urlencode = self.all_keywords(*keywords, type='urlencode')
         keyword = self.all_keywords(*keywords, type='string')
         url = 'https://www.ftvnews.com.tw/search/' + keyword_urlencode
@@ -508,7 +505,7 @@ class news_crawler(models.Model):
         urls = soup.select('ul > li > a.clearfix')
         publishes = soup.select('div.time')
         publisher = '民視新聞網'
-        for i in range(len(urls)):
+        for i, v in enumerate(urls):
             url = 'https://www.ftvnews.com.tw'+urls[i].get('href')
             title = titles[i].text.replace('\u3000', ' ')  # 將全形space取代為半形space
             publish = publishes[i].text
@@ -540,7 +537,7 @@ class news_crawler(models.Model):
             else:
                 break
 
-    async def get_cna_news(self, s, *keywords, token=token):
+    async def get_cna_news(self, async_session, *keywords, token=token):
         keyword_urlencode = self.all_keywords(*keywords, type='urlencode')
         keyword = self.all_keywords(*keywords, type='string')
         url = 'https://www.cna.com.tw/search/hysearchws.aspx?q=' + keyword_urlencode
@@ -550,7 +547,7 @@ class news_crawler(models.Model):
         titles = soup.select('div.listInfo > h2')
         dates = soup.select('div.date')
         publisher = 'CNA中央社'
-        for i in range(len(urls)):
+        for i, v in enumerate(urls):
             url = urls[i].get('href')
             title = titles[i].text.replace('\u3000', ' ')  # 將全形space取代為半形space
             publish = dates[i].text
@@ -583,19 +580,22 @@ class news_crawler(models.Model):
                 break
 
     async def main(self, *keywords, token=token):
-        s = AsyncHTMLSession()
-        udn_task = self.get_udn_news(s, *keywords, token=token)
-        apple_task = self.get_apple_news(s, *keywords, token=token)
-        setn_task = self.get_setn_news(s, *keywords, token=token)
-        ettoday_task = self.get_ettoday_news(s, *keywords, token=token)
-        tvbs_task = self.get_TVBS_news(s, *keywords, token=token)
-        china_task = self.get_china_news(s, *keywords, token=token)
-        storm_task = self.get_storm_news(s, *keywords, token=token)
-        ttv_task = self.get_ttv_news(s, *keywords, token=token)
-        ftv_task = self.get_ftv_news(s, *keywords, token=token)
-        ltn_task = self.get_ltn_news(s, *keywords, token=token)
-        cna_task = self.get_cna_news(s, *keywords, token=token)
+        ''' 將所有取得新聞的func集合 '''
+        async_session = AsyncHTMLSession()
+        udn_task = self.get_udn_news(async_session, *keywords, token=token)
+        apple_task = self.get_apple_news(async_session, *keywords, token=token)
+        setn_task = self.get_setn_news(async_session, *keywords, token=token)
+        ettoday_task = self.get_ettoday_news(
+            async_session, *keywords, token=token)
+        tvbs_task = self.get_tvbs_news(async_session, *keywords, token=token)
+        china_task = self.get_china_news(async_session, *keywords, token=token)
+        storm_task = self.get_storm_news(async_session, *keywords, token=token)
+        ttv_task = self.get_ttv_news(async_session, *keywords, token=token)
+        ftv_task = self.get_ftv_news(async_session, *keywords, token=token)
+        ltn_task = self.get_ltn_news(async_session, *keywords, token=token)
+        cna_task = self.get_cna_news(async_session, *keywords, token=token)
         return await asyncio.gather(udn_task, apple_task, setn_task, ettoday_task, tvbs_task, china_task, storm_task, ttv_task, ftv_task, ltn_task, cna_task)
 
     def run_main(self, *keywords, token=token):
+        ''' for Odoo server call a single func'''
         asyncio.run(self.main(*keywords, token=token))
