@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from requests_html import AsyncHTMLSession
 _logger = logging.getLogger(__name__)
 
-class news_crawler(models.Model):
+class News_crawler(models.Model):
     _name = 'news_crawler'
     _description = '根據關鍵字爬取 News'
 
@@ -21,7 +21,7 @@ class news_crawler(models.Model):
     headers = {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.93 Safari/537.36'
     }
-    def lineNotify(self,token, msg): #, picURI):
+    def line_notify(self,token, msg): #, picURI):
         url = "https://notify-api.line.me/api/notify"
         headers = {
             "Authorization": "Bearer " + token
@@ -74,7 +74,7 @@ class news_crawler(models.Model):
                             self.env.cr.commit()
                             if create_record:
                                 line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
-                                self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
+                                self.line_notify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                         else:
                             break
                     else:
@@ -115,7 +115,7 @@ class news_crawler(models.Model):
                         self.env.cr.commit()
                         if create_record:
                             line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
-                            self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
+                            self.line_notify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                     else:
                         break
                 else:
@@ -123,15 +123,17 @@ class news_crawler(models.Model):
     async def get_apple_news(self,s,*keywords,token=token): 
         keyword_urlencode = self.all_keywords(*keywords,type='urlencode')
         keyword = self.all_keywords(*keywords,type='string')
-        apple_url = 'https://tw.appledaily.com/pf/api/v3/content/fetch/search-query?query=%7B%22searchTerm%22%3A%22'+ keyword_urlencode +'%22%2C%22start%22%3A0%7D&_website=tw-appledaily'
-        res = requests.get(url=apple_url,headers=self.headers)
-        news = res.json()['content']
-        for i in range(len(news)):
-            url = news[i]['sharing']['url']
-            title = news[i]['title'].replace('\u3000',' ') #將全形space取代為半形space
-            dateString = news[i]['pubDate']
-            publisher = news[i]['brandName']
-            published_date = datetime.fromtimestamp(int(dateString))
+        apply_url = 'https://tw.appledaily.com/search/' + urllib.parse.quote_plus(keyword_urlencode)
+        res = requests.get(url=apply_url,headers=self.headers)
+        soup = BeautifulSoup(res.text, 'html.parser')
+        publish = soup.select('div.timestamp')
+        for i in range(len(publish)):
+            title = soup.select('span.headline')[i].text
+            dateString = soup.select('div.timestamp')[i].text
+            dateFormatter = "出版時間：%Y/%m/%d %H:%M"
+            published_date = datetime.strptime(dateString, dateFormatter)
+            publisher = '蘋果新聞網'
+            url = 'https://tw.appledaily.com/'+soup.select('a.story-card')[i].get('href')
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(f'keyword: {keyword} publisher: {publisher} token: {token}')    
@@ -148,7 +150,7 @@ class news_crawler(models.Model):
                     self.env.cr.commit()
                     if create_record:
                         line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
-                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
+                        self.line_notify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
             else:
@@ -188,7 +190,7 @@ class news_crawler(models.Model):
                         self.env.cr.commit()
                         if create_record:
                             line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
-                            self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
+                            self.line_notify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                     else:
                         break
                 else:
@@ -227,7 +229,7 @@ class news_crawler(models.Model):
                     self.env.cr.commit()
                     if create_record:
                         line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
-                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
+                        self.line_notify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
             else:
@@ -263,7 +265,7 @@ class news_crawler(models.Model):
                     self.env.cr.commit()
                     if create_record:
                         line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
-                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
+                        self.line_notify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
             else:
@@ -300,7 +302,7 @@ class news_crawler(models.Model):
                     self.env.cr.commit()
                     if create_record:
                         line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
-                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
+                        self.line_notify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
             else:
@@ -336,7 +338,7 @@ class news_crawler(models.Model):
                     self.env.cr.commit()
                     if create_record:
                         line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
-                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
+                        self.line_notify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
             else:
@@ -373,7 +375,7 @@ class news_crawler(models.Model):
                     self.env.cr.commit()
                     if create_record:
                         line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
-                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
+                        self.line_notify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
             else:
@@ -410,7 +412,7 @@ class news_crawler(models.Model):
                     self.env.cr.commit()
                     if create_record:
                         line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
-                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
+                        self.line_notify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
             else:
@@ -447,7 +449,7 @@ class news_crawler(models.Model):
                     self.env.cr.commit()
                     if create_record:
                         line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
-                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
+                        self.line_notify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
             else:
@@ -484,7 +486,7 @@ class news_crawler(models.Model):
                     self.env.cr.commit()
                     if create_record:
                         line_token = self.env['config_token'].search([('env_name','=',token)]).line_token
-                        self.lineNotify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
+                        self.line_notify(line_token, title + " 〔" + keyword + "〕 " + url)   #發送 Line Notify 訊息
                 else:
                     break
             else:
