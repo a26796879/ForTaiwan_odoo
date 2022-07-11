@@ -9,6 +9,7 @@ import time
 import urllib
 import newspaper
 import logging
+import re
 from bs4 import BeautifulSoup
 from requests_html import AsyncHTMLSession
 _logger = logging.getLogger(__name__)
@@ -65,8 +66,8 @@ class news_crawler(models.Model):
                 'https://m.ltn', 'https://news.ltn')  # 如果有m版網址，將其取代
             publisher = news[i]['publisher']['title']
             dateString = news[i]['published date']
-            dateFormatter = "%a, %d %b %Y %H:%M:%S GMT"
-            published_date = datetime.strptime(dateString, dateFormatter)
+            date_format = "%a, %d %b %Y %H:%M:%S GMT"
+            published_date = datetime.strptime(dateString, date_format)
             expect_time = datetime.today() - timedelta(hours=1)
             article = Article(url, config=config)
             try:
@@ -117,8 +118,8 @@ class news_crawler(models.Model):
             title = news[i]['title'].replace(
                 '\u3000', ' ')  # 將全形space取代為半形space
             dateString = news[i]['time']['date']
-            dateFormatter = "%Y-%m-%d %H:%M:%S"
-            published_date = datetime.strptime(dateString, dateFormatter)
+            date_format = "%Y-%m-%d %H:%M:%S"
+            published_date = datetime.strptime(dateString, date_format)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(
@@ -159,8 +160,8 @@ class news_crawler(models.Model):
         for i in range(len(publish)):
             title = soup.select('span.headline')[i].text
             dateString = soup.select('div.timestamp')[i].text
-            dateFormatter = "出版時間：%Y/%m/%d %H:%M"
-            published_date = datetime.strptime(dateString, dateFormatter)
+            date_format = "出版時間：%Y/%m/%d %H:%M"
+            published_date = datetime.strptime(dateString, date_format)
             publisher = '蘋果新聞網'
             url = 'https://tw.appledaily.com/' + \
                 soup.select('a.story-card')[i].get('href')
@@ -214,8 +215,8 @@ class news_crawler(models.Model):
                     publish = soup.select('span.time')[1].text.replace(
                         '\n    ', '').replace('\r', '')
                 if len(self.search([("url", "=", url)])) == 0 and len(self.search([("name", "=", title)])) == 0:
-                    dateFormatter = "%Y/%m/%d %H:%M"
-                    published_date = datetime.strptime(publish, dateFormatter)
+                    date_format = "%Y/%m/%d %H:%M"
+                    published_date = datetime.strptime(publish, date_format)
                     expect_time = datetime.today() - timedelta(hours=1)
                     if published_date >= expect_time:
                         create_record = self.create({
@@ -255,8 +256,8 @@ class news_crawler(models.Model):
             dateString = dates[i].text
             url = 'https://www.setn.com/' + \
                 url_tag[i].get('href').replace('&From=Search', '')
-            dateFormatter = "%Y/%m/%d %H:%M"
-            published_date = datetime.strptime(dateString, dateFormatter)
+            date_format = "%Y/%m/%d %H:%M"
+            published_date = datetime.strptime(dateString, date_format)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(
@@ -297,8 +298,8 @@ class news_crawler(models.Model):
             title = titles[i].text.replace('\u3000', ' ')  # 將全形space取代為半形space
             url = titles[i].get('href')
             publish = date[i].text.split('/')[1].replace(' ', '')
-            dateFormatter = "%Y-%m-%d%H:%M)"
-            published_date = datetime.strptime(publish, dateFormatter)
+            date_format = "%Y-%m-%d%H:%M)"
+            published_date = datetime.strptime(publish, date_format)
             _logger.debug('===================================')
             _logger.debug(
                 f'keyword: {keyword} publisher: {publisher} token: {token}')
@@ -331,16 +332,18 @@ class news_crawler(models.Model):
         url = 'https://news.tvbs.com.tw/news/searchresult/' + keyword_urlencode + '/news'
         res = requests.get(url=url, headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
-        titles = soup.select('h2.search_list_txt')
-        urls = soup.select('span.search_list_box > a')
-        dates = soup.select('span.publish_date')
+        titles = soup.select('h2')
         publisher = 'TVBS新聞網'
         for i in range(len(titles)):
             title = titles[i].text.replace('\u3000', ' ')  # 將全形space取代為半形space
-            url = urls[i].get('href')
-            publish = dates[i].text
-            dateFormatter = "%Y/%m/%d %H:%M"
-            published_date = datetime.strptime(publish, dateFormatter)
+            each_url = titles[i].find_parents("a")[0].get('href')
+            res = requests.get(url=each_url, headers=self.headers)
+            soup = BeautifulSoup(res.text, 'html.parser')
+            sult = "發佈時間：\d\d\d\d\/\d\d\/\d\d \d\d:\d\d"
+            match = re.search(sult, soup.select('div.author')[0].text)
+            dateFormatter = "發佈時間：%Y/%m/%d %H:%M"
+            published_date = datetime.strptime(match.group(), dateFormatter)
+            expect_time = datetime.today() - timedelta(hours=8)
             _logger.debug('===================================')
             _logger.debug(
                 f'keyword: {keyword} publisher: {publisher} token: {token}')
@@ -380,8 +383,8 @@ class news_crawler(models.Model):
             title = titles[i].text.replace('\u3000', ' ')  # 將全形space取代為半形space
             url = titles[i].get('href')
             dateString = dates[i].get('datetime')
-            dateFormatter = "%Y-%m-%d %H:%M"
-            published_date = datetime.strptime(dateString, dateFormatter)
+            date_format = "%Y-%m-%d %H:%M"
+            published_date = datetime.strptime(dateString, date_format)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(
@@ -424,8 +427,8 @@ class news_crawler(models.Model):
             url = 'https://www.storm.mg' + \
                 urls[i].get('href').replace('?kw='+keyword+'&pi=0', '')
             publish_date = publish_dates[i].text
-            dateFormatter = "%Y-%m-%d %H:%M"
-            published_date = datetime.strptime(publish_date, dateFormatter)
+            date_format = "%Y-%m-%d %H:%M"
+            published_date = datetime.strptime(publish_date, date_format)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(
@@ -467,8 +470,8 @@ class news_crawler(models.Model):
             # 將全形space取代為半形space
             title = titles[i+2].text.replace('\u3000', ' ')
             publish = publishes[i].text
-            dateFormatter = "%Y/%m/%d %H:%M:%S"
-            published_date = datetime.strptime(publish, dateFormatter)
+            date_format = "%Y/%m/%d %H:%M:%S"
+            published_date = datetime.strptime(publish, date_format)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(
@@ -509,8 +512,8 @@ class news_crawler(models.Model):
             url = 'https://www.ftvnews.com.tw'+urls[i].get('href')
             title = titles[i].text.replace('\u3000', ' ')  # 將全形space取代為半形space
             publish = publishes[i].text
-            dateFormatter = "%Y/%m/%d %H:%M:%S"
-            published_date = datetime.strptime(publish, dateFormatter)
+            date_format = "%Y/%m/%d %H:%M:%S"
+            published_date = datetime.strptime(publish, date_format)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(
@@ -551,8 +554,8 @@ class news_crawler(models.Model):
             url = urls[i].get('href')
             title = titles[i].text.replace('\u3000', ' ')  # 將全形space取代為半形space
             publish = dates[i].text
-            dateFormatter = "%Y/%m/%d %H:%M"
-            published_date = datetime.strptime(publish, dateFormatter)
+            date_format = "%Y/%m/%d %H:%M"
+            published_date = datetime.strptime(publish, date_format)
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(
