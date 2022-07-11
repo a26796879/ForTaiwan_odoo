@@ -3,7 +3,8 @@ from odoo import http
 import json, logging
 _logger = logging.getLogger(__name__)
 
-class Icon_Settings(http.Controller):
+class IconSettings(http.Controller):
+    '''for setting icon on map'''
     @http.route('/objects', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
     def icon_settings(self):
         dataset = http.request.env['icon_settings'].sudo().search([])
