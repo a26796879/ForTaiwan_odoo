@@ -32,7 +32,7 @@ class NewsCrawler(models.Model):
     }
 
     def line_notify(self, token, msg):  # , picURI):
-        '''send line notify to users by token''' 
+        '''send line notify to users by token'''
         url = "https://notify-api.line.me/api/notify"
         headers = {
             "Authorization": "Bearer " + token
@@ -41,8 +41,7 @@ class NewsCrawler(models.Model):
         res = requests.post(url, headers=headers, params=payload)
         return res.status_code
 
-    @classmethod
-    def all_keywords(cls, *keywords, type):
+    def all_keywords(*keywords, type):
         '''get user setup all keywords'''
         all_words = ''
         if type == 'urlencode':
@@ -80,7 +79,7 @@ class NewsCrawler(models.Model):
                 article.parse()
                 if keyword in article.text and 'from' not in url and 'yahoo' not in url:
                     if len(self.search([("url", "=", url)])) == 0 \
-                    and len(self.search([("name", "=", title)])) == 0:
+                            and len(self.search([("name", "=", title)])) == 0:
                         if published_date >= expect_time:
                             create_record = self.create({
                                 'id': 1,
@@ -117,10 +116,10 @@ class NewsCrawler(models.Model):
         news = res.json()['lists']
         publisher = 'UDN聯合新聞網'
         for item in enumerate(news):
-            url = news[item]['titleLink']
-            title = news[item]['title'].replace(
+            url = news[item[0]]['titleLink']
+            title = news[item[0]]['title'].replace(
                 '\u3000', ' ')  # 將全形space取代為半形space
-            date_string = news[item]['time']['date']
+            date_string = news[item[0]]['time']['date']
             date_format = "%Y-%m-%d %H:%M:%S"
             published_date = datetime.strptime(date_string, date_format)
             expect_time = datetime.today() - timedelta(hours=1)
@@ -464,15 +463,16 @@ class NewsCrawler(models.Model):
         url = 'https://news.ttv.com.tw/search/' + keyword_urlencode
         res = await async_session.get(url=url, headers=self.headers)
         soup = BeautifulSoup(res.text, 'html.parser')
-        titles = soup.select('div.title')
+        titles = soup.select('ul > li > a.clearfix > div.content > div.title')
         urls = soup.select('ul > li > a.clearfix')
-        publishes = soup.select('div.time')
+        publishes = soup.select(
+            'ul > li > a.clearfix > div.content > div.time')
         publisher = '台視新聞網'
-        for i in range(len(urls)):
-            url = 'https://news.ttv.com.tw/'+urls[i].get('href')
+        for value in enumerate(urls):
+            url = 'https://news.ttv.com.tw/'+urls[value[0]].get('href')
             # 將全形space取代為半形space
-            title = titles[i+2].text.replace('\u3000', ' ')
-            publish = publishes[i].text
+            title = titles[value[0]].text.replace('\u3000', ' ')
+            publish = publishes[value[0]].text
             date_format = "%Y/%m/%d %H:%M:%S"
             published_date = datetime.strptime(publish, date_format)
             expect_time = datetime.today() - timedelta(hours=1)
@@ -505,7 +505,7 @@ class NewsCrawler(models.Model):
         keyword_urlencode = self.all_keywords(*keywords, type='urlencode')
         keyword = self.all_keywords(*keywords, type='string')
         url = 'https://www.ftvnews.com.tw/search/' + keyword_urlencode
-        res = await async_session.get(url=url, headers=self.headers)
+        res = await async_session.get(url=url, headers=self.headers, allow_redirects=False)
         soup = BeautifulSoup(res.text, 'html.parser')
         titles = soup.select('div.title')
         urls = soup.select('ul > li > a.clearfix')
@@ -591,7 +591,8 @@ class NewsCrawler(models.Model):
         udn_task = self.get_udn_news(async_session, *keywords, token=token)
         apple_task = self.get_apple_news(async_session, *keywords, token=token)
         setn_task = self.get_setn_news(async_session, *keywords, token=token)
-        ettoday_task = self.get_ettoday_news(async_session, *keywords, token=token)
+        ettoday_task = self.get_ettoday_news(
+            async_session, *keywords, token=token)
         tvbs_task = self.get_tvbs_news(async_session, *keywords, token=token)
         china_task = self.get_china_news(async_session, *keywords, token=token)
         storm_task = self.get_storm_news(async_session, *keywords, token=token)
