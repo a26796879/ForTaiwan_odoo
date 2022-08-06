@@ -8,7 +8,7 @@ import requests
 import newspaper
 from newspaper import Article, Config
 from gnews import GNews
-from odoo import models, fields, api
+from odoo import models, fields
 from bs4 import BeautifulSoup
 from requests_html import AsyncHTMLSession
 _logger = logging.getLogger(__name__)
@@ -41,19 +41,20 @@ class NewsCrawler(models.Model):
         res = requests.post(url, headers=headers, params=payload)
         return res.status_code
 
-    def all_keywords(*keywords, type):
+    def all_keywords(self, *keywords, type):
         '''get user setup all keywords'''
         all_words = ''
         if type == 'urlencode':
-            for word in keywords[1:]:
-                all_words += urllib.parse.quote(str(word)) + '%20'
+            for word in keywords:
+                all_words += urllib.parse.quote_plus(str(word)) + '%20'
             return all_words[0:-3]
         else:
-            for word in keywords[1:]:
+            for word in keywords:
                 all_words += str(word) + '&'
             return all_words[0:-1]
 
     def get_google_news(self, keyword, token=token):
+        '''get google news by GNews library'''
         google_news = GNews(language='zh-Hant', country='TW', period='4h')
         news = google_news.get_news(keyword)
         news_count = len(news)
@@ -104,6 +105,7 @@ class NewsCrawler(models.Model):
                 continue
 
     async def get_udn_news(self, async_session, *keywords, token=token):
+        ''' get udn news by crawling'''
         keyword_urlencode = self.all_keywords(*keywords, type='urlencode')
         keyword = self.all_keywords(*keywords, type='string')
         _logger.debug(*keywords)
@@ -165,8 +167,7 @@ class NewsCrawler(models.Model):
             date_format = "出版時間：%Y/%m/%d %H:%M"
             published_date = datetime.strptime(date_string, date_format)
             publisher = '蘋果新聞網'
-            url = 'https://tw.appledaily.com/' + \
-                soup.select('a.story-card')[i].get('href')
+            url = soup.select('a.story-card')[i].get('href')
             expect_time = datetime.today() - timedelta(hours=1)
             _logger.debug('===================================')
             _logger.debug(
@@ -216,7 +217,8 @@ class NewsCrawler(models.Model):
                 if publish == "":
                     publish = soup.select('span.time')[1].text.replace(
                         '\n    ', '').replace('\r', '')
-                if len(self.search([("url", "=", url)])) == 0 and len(self.search([("name", "=", title)])) == 0:
+                if len(self.search([("url", "=", url)])) == 0 \
+                        and len(self.search([("name", "=", title)])) == 0:
                     date_format = "%Y/%m/%d %H:%M"
                     published_date = datetime.strptime(publish, date_format)
                     expect_time = datetime.today() - timedelta(hours=1)
@@ -264,7 +266,8 @@ class NewsCrawler(models.Model):
             _logger.debug('===================================')
             _logger.debug(
                 f'keyword: {keyword} publisher: {publisher} token: {token}')
-            if len(self.search([("url", "=", url)])) == 0 and len(self.search([("name", "=", title)])) == 0:
+            if len(self.search([("url", "=", url)])) == 0 \
+                    and len(self.search([("name", "=", title)])) == 0:
                 if published_date >= expect_time:
                     create_record = self.create({
                         'id': 1,
@@ -341,7 +344,7 @@ class NewsCrawler(models.Model):
             each_url = titles[i].find_parents("a")[0].get('href')
             res = await async_session.get(url=each_url, headers=self.headers)
             soup = BeautifulSoup(res.text, 'html.parser')
-            sult = "發佈時間：\d\d\d\d\/\d\d\/\d\d \d\d:\d\d"
+            sult = r"發佈時間：\d\d\d\d\/\d\d\/\d\d \d\d:\d\d"
             match = re.search(sult, soup.select('div.author')[0].text)
             dateFormatter = "發佈時間：%Y/%m/%d %H:%M"
             published_date = datetime.strptime(match.group(), dateFormatter)
