@@ -19,14 +19,21 @@ class IconSettings(http.Controller):
         results = json.dumps({'data': result})
         return results
 
+    @http.route('/vote_types', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
+    def get_vote_types(self):
+        ''' get vote data by vote type'''
+        dataset = http.request.env['vote_data'].sudo().search(
+            [('vote_type', '!=', '')])
+        vote_types = [i.vote_type for i in dataset]
+        results = json.dumps({'data': vote_types})
+        return results
+
     @http.route('/vote_data/<string:vote_type>', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
-    def vote_data_vote_type(self, vote_type):
+    def vote_data_type(self, vote_type):
         ''' get vote data by vote type'''
         dataset = http.request.env['vote_data'].sudo().search(
             [('vote_type', '=', vote_type)])
-        citys = []
-        for i in dataset:
-            citys.append(i.city)
+        citys = [i.city for i in dataset]
         results = json.dumps({'data': citys})
         return results
 
@@ -35,9 +42,7 @@ class IconSettings(http.Controller):
         ''' get vote data by vote city'''
         dataset = http.request.env['vote_data'].sudo().search(
             [('vote_type', '=', vote_type), ('city', '=', city)])
-        places = []
-        for i in dataset:
-            places.append(i.place)
+        places = [i.place for i in dataset]
         results = json.dumps({'data': places})
         return results
 
@@ -47,7 +52,7 @@ class IconSettings(http.Controller):
         ''' get vote data by vote place'''
         dataset = http.request.env['vote_data'].sudo().search(
             [('vote_type', '=', vote_type), ('city', '=', city), ('place', '=', place)])
-        districts = []
+        districts = [i.district for i in dataset]
         for i in dataset:
             districts.append(i.district)
         results = json.dumps({'data': districts})
@@ -68,11 +73,9 @@ class IconSettings(http.Controller):
                 methods=["GET"], csrf=False, cors='*')
     def map_data_city(self, city):
         ''' get map data by city'''
-        districts = []
         dataset = http.request.env['map_data'].sudo().search(
             [('city', '=', city)])
-        for i in dataset:
-            districts.append(i.district)
+        districts = [i.district for i in dataset]
         results = json.dumps({'data': districts})
         return results
 
