@@ -25,7 +25,7 @@ class IconSettings(http.Controller):
         dataset = http.request.env['vote_data'].sudo().search(
             [('vote_type', '!=', '')])
         vote_types = [i.vote_type for i in dataset]
-        results = json.dumps({'data': vote_types})
+        results = json.dumps({'data': list(set(vote_types))})
         return results
 
     @http.route('/vote_data/<string:vote_type>', type="http", auth="public", methods=["GET"], csrf=False, cors='*')
