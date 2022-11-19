@@ -53,8 +53,6 @@ class IconSettings(http.Controller):
         dataset = http.request.env['vote_data'].sudo().search(
             [('vote_type', '=', vote_type), ('city', '=', city), ('place', '=', place)])
         districts = [i.district for i in dataset]
-        for i in dataset:
-            districts.append(i.district)
         results = json.dumps({'data': districts})
         return results
 
